@@ -1,94 +1,40 @@
-import * as React from "react"
-import { Link, graphql } from "gatsby"
-
-import Bio from "../components/bio"
+import React from "react"
 import Layout from "../components/layout"
 import Seo from "../components/seo"
 
-const BlogIndex = ({ data, location }) => {
-  const siteTitle = data.site.siteMetadata?.title || `Title`
-  const posts = data.allMarkdownRemark.nodes
-
-  if (posts.length === 0) {
+const IndexPage = () => {
     return (
-      <Layout location={location} title={siteTitle}>
-        <Bio />
-        <p>
-          No blog posts found. Add markdown posts to "content/blog" (or the
-          directory you specified for the "gatsby-source-filesystem" plugin in
-          gatsby-config.js).
-        </p>
-      </Layout>
+        <Layout>
+            <Seo title="首页" />
+            <div className="bg-blue-600 text-white py-16">
+                <div className="container mx-auto px-4 text-center">
+                    <h1 className="text-4xl font-bold mb-4">全球财税解决方案</h1>
+                    <p className="text-xl mb-8">专业的国际财税咨询、税务筹划和商务服务</p>
+                    <button className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-300">
+                        立即咨询
+                    </button>
+                </div>
+            </div>
+
+            <div className="container mx-auto px-4 py-12">
+                <h2 className="text-3xl font-bold text-center mb-8">我们的服务</h2>
+                <div className="grid md:grid-cols-3 gap-6">
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h3 className="text-xl font-semibold mb-3">税务筹划</h3>
+                        <p className="text-gray-600">专业的国际税务规划服务</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h3 className="text-xl font-semibold mb-3">财税合规</h3>
+                        <p className="text-gray-600">确保企业财税操作合规</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h3 className="text-xl font-semibold mb-3">商务咨询</h3>
+                        <p className="text-gray-600">全面的商务支持服务</p>
+                    </div>
+                </div>
+            </div>
+        </Layout>
     )
-  }
-
-  return (
-    <Layout location={location} title={siteTitle}>
-      <Bio />
-      <ol style={{ listStyle: `none` }}>
-        {posts.map(post => {
-          const title = post.frontmatter.title || post.fields.slug
-
-          return (
-            <li key={post.fields.slug}>
-              <article
-                className="post-list-item"
-                itemScope
-                itemType="http://schema.org/Article"
-              >
-                <header>
-                  <h2>
-                    <Link to={post.fields.slug} itemProp="url">
-                      <span itemProp="headline">{title}</span>
-                    </Link>
-                  </h2>
-                  <small>{post.frontmatter.date}</small>
-                </header>
-                <section>
-                  <p
-                    dangerouslySetInnerHTML={{
-                      __html: post.frontmatter.description || post.excerpt,
-                    }}
-                    itemProp="description"
-                  />
-                </section>
-              </article>
-            </li>
-          )
-        })}
-      </ol>
-    </Layout>
-  )
 }
 
-export default BlogIndex
-
-/**
- * Head export to define metadata for the page
- *
- * See: https://www.gatsbyjs.com/docs/reference/built-in-components/gatsby-head/
- */
-export const Head = () => <Seo title="All posts" />
-
-export const pageQuery = graphql`
-  {
-    site {
-      siteMetadata {
-        title
-      }
-    }
-    allMarkdownRemark(sort: { frontmatter: { date: DESC } }) {
-      nodes {
-        excerpt
-        fields {
-          slug
-        }
-        frontmatter {
-          date(formatString: "MMMM DD, YYYY")
-          title
-          description
-        }
-      }
-    }
-  }
-`
+export default IndexPage
