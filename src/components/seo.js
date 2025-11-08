@@ -1,54 +1,99 @@
 import React from "react"
-import { useStaticQuery, graphql } from "gatsby"
+import { useLocation } from "@reach/router"
+import { Helmet } from "react-helmet"
+import { useSiteMetadata } from "../hooks/use-site-metadata"
+import { languages, defaultLanguage } from "../config/languages"
 
-const Seo = ({ title, description, lang = "zh", children }) => {
-    const { site } = useStaticQuery(
-        graphql`
-      query {
-        site {
-          siteMetadata {
-            title
-            titleTemplate
-            description
-            author
-            siteUrl
-            social {
-              twitter
+export default function Seo({
+                                title,
+                                description,
+                                image,
+                                article,
+                                lang
+                            }) {
+    const location = useLocation()
+    const { siteUrl, defaultTitle, defaultDescription, defaultImage } = useSiteMetadata()
+
+    // 从路径检测语言
+    const getCurrentLanguage = () => {
+        if (typeof window === "undefined") return defaultLanguage
+
+        const path = location.pathname
+        for (const language of Object.keys(languages)) {
+            if (path.startsWith(`/${language}/`) || path === `/${language}`) {
+                return language
             }
-          }
         }
-      }
-    `
-    )
+        return defaultLanguage
+    }
 
-    const metaDescription = description || site.siteMetadata.description
-    const defaultTitle = site.siteMetadata.title
-    const titleTemplate = site.siteMetadata.titleTemplate
+    const currentLang = getCurrentLanguage()
+    const seo = {
+        title: title || defaultTitle,
+        description: description || defaultDescription,
+        image: `${siteUrl}${image || defaultImage}`,
+        url: `${siteUrl}${location.pathname}`,
+        lang: currentLang,
+    }
+
+    // 生成多语言替代链接 - 修复：使用 Object.keys(languages) 而不是 languageCodes
+    const alternateLinks = Object.keys(languages).map(langCode => ({
+        rel: 'alternate',
+        hreflang: langCode,
+        href: `${siteUrl}/${langCode}${location.pathname.replace(/^\/[a-z]{2}/, '') || ''}`
+    }))
 
     return (
-        <>
-            <title>
-                {title ? titleTemplate.replace("%s", title) : defaultTitle}
-            </title>
-            <html lang={lang} />
-            <meta name="description" content={metaDescription} />
-            <meta name="author" content={site.siteMetadata.author} />
-
-            {/* Open Graph */}
-            <meta property="og:title" content={title || defaultTitle} />
-            <meta property="og:description" content={metaDescription} />
-            <meta property="og:type" content="website" />
-            <meta property="og:url" content={site.siteMetadata.siteUrl} />
-
-            {/* Twitter */}
-            <meta name="twitter:card" content="summary" />
-            <meta name="twitter:creator" content={site.siteMetadata.social.twitter} />
-            <meta name="twitter:title" content={title || defaultTitle} />
-            <meta name="twitter:description" content={metaDescription} />
-
-            {children}
-        </>
+        <Helmet
+            htmlAttributes={{ lang: seo.lang }}
+            title={seo.title}
+            meta={[
+                {
+                    name: `description`,
+                    content: seo.description,
+                },
+                {
+                    property: `og:title`,
+                    content: seo.title,
+                },
+                {
+                    property: `og:description`,
+                    content: seo.description,
+                },
+                {
+                    property: `og:type`,
+                    content: article ? `article` : `website`,
+                },
+                {
+                    property: `og:url`,
+                    content: seo.url,
+                },
+                {
+                    property: `og:image`,
+                    content: seo.image,
+                },
+                {
+                    name: `twitter:card`,
+                    content: `summary_large_image`,
+                },
+                {
+                    name: `twitter:title`,
+                    content: seo.title,
+                },
+                {
+                    name: `twitter:description`,
+                    content: seo.description,
+                },
+                {
+                    name: `twitter:image`,
+                    content: seo.image,
+                },
+            ]}
+        >
+            {alternateLinks.map(link => (
+                <link key={link.hreflang} {...link} />
+            ))}
+            <link rel="canonical" href={seo.url} />
+        </Helmet>
     )
 }
-
-export default Seo

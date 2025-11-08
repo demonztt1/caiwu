@@ -1,8 +1,12 @@
 import React from "react"
 import { Link } from "gatsby"
+import { useTranslation } from "../hooks/use-translation"
+import { useLocalizedPath } from "../hooks/use-localized-path"
 
 const Footer = () => {
     const currentYear = new Date().getFullYear()
+    const { t } = useTranslation()
+    const { getLocalizedPath } = useLocalizedPath()
 
     return (
         <footer className="bg-gray-800 text-white">
@@ -10,9 +14,11 @@ const Footer = () => {
                 <div className="grid md:grid-cols-4 gap-8">
                     {/* Company Info */}
                     <div className="md:col-span-2">
-                        <h3 className="text-2xl font-bold text-white mb-4">全球财税解决方案</h3>
+                        <h3 className="text-2xl font-bold text-white mb-4">
+                            {t('footer.companyName')}
+                        </h3>
                         <p className="text-gray-300 mb-4">
-                            专业的国际财税咨询、税务筹划和商务服务，为企业提供全方位的财税解决方案。
+                            {t('footer.companyDescription')}
                         </p>
                         <div className="flex space-x-4">
                             <a
@@ -36,30 +42,32 @@ const Footer = () => {
 
                     {/* Quick Links */}
                     <div>
-                        <h4 className="text-lg font-semibold mb-4">快速链接</h4>
+                        <h4 className="text-lg font-semibold mb-4">
+                            {t('footer.quickLinks')}
+                        </h4>
                         <ul className="space-y-2">
                             <li>
                                 <Link
-                                    to="/services"
+                                    to={getLocalizedPath("/services")}
                                     className="text-gray-300 hover:text-white transition duration-300"
                                 >
-                                    服务项目
+                                    {t('footer.services')}
                                 </Link>
                             </li>
                             <li>
                                 <Link
-                                    to="/about"
+                                    to={getLocalizedPath("/about")}
                                     className="text-gray-300 hover:text-white transition duration-300"
                                 >
-                                    关于我们
+                                    {t('footer.about')}
                                 </Link>
                             </li>
                             <li>
                                 <Link
-                                    to="/contact"
+                                    to={getLocalizedPath("/contact")}
                                     className="text-gray-300 hover:text-white transition duration-300"
                                 >
-                                    联系我们
+                                    {t('footer.contact')}
                                 </Link>
                             </li>
                         </ul>
@@ -67,11 +75,13 @@ const Footer = () => {
 
                     {/* Contact Info */}
                     <div>
-                        <h4 className="text-lg font-semibold mb-4">联系我们</h4>
+                        <h4 className="text-lg font-semibold mb-4">
+                            {t('footer.contactUs')}
+                        </h4>
                         <ul className="space-y-2 text-gray-300">
-                            <li>电话: +86 10 1234 5678</li>
-                            <li>邮箱: contact@yourtaxwebsite.com</li>
-                            <li>地址: 北京市朝阳区金融街123号</li>
+                            <li>{t('footer.phone')}: +86 158 4946 7131</li>
+                            <li>{t('footer.email')}: 276852953@qq.com</li>
+                            <li>{t('footer.address')}: 成都龙泉驿金融街123号</li>
                         </ul>
                     </div>
                 </div>
@@ -79,20 +89,20 @@ const Footer = () => {
                 {/* Bottom Bar */}
                 <div className="border-t border-gray-700 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
                     <p className="text-gray-400 text-sm">
-                        © {currentYear} 全球财税解决方案. 保留所有权利.
+                        © {currentYear} {t('footer.companyName')}. {t('footer.rights')} 晋ICP备2023001542号-1
                     </p>
                     <div className="flex space-x-6 mt-4 md:mt-0">
                         <Link
-                            to="/privacy"
+                            to={getLocalizedPath("/privacy")}
                             className="text-gray-400 hover:text-white text-sm transition duration-300"
                         >
-                            隐私政策
+                            {t('footer.privacyPolicy')}
                         </Link>
                         <Link
-                            to="/terms"
+                            to={getLocalizedPath("/terms")}
                             className="text-gray-400 hover:text-white text-sm transition duration-300"
                         >
-                            使用条款
+                            {t('footer.terms')}
                         </Link>
                     </div>
                 </div>

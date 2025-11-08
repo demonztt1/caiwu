@@ -1,12 +1,26 @@
+// src/components/layout.js
 import React from "react"
+import { useStaticQuery, graphql } from "gatsby"
 import Header from "./header"
 import Footer from "./footer"
-// import "./layout.css" // 如果不需要自定义CSS可以移除
+import { useTranslation } from "../hooks/use-translation"
 
 const Layout = ({ children }) => {
+    const data = useStaticQuery(graphql`
+    query SiteTitleQuery {
+      site {
+        siteMetadata {
+          title
+        }
+      }
+    }
+  `)
+
+    const { t } = useTranslation()
+
     return (
-        <div className="min-h-screen flex flex-col bg-gray-50">
-            <Header />
+        <div className="min-h-screen flex flex-col">
+            <Header siteTitle={data.site.siteMetadata?.title || `Title`} />
             <main className="flex-grow">
                 {children}
             </main>

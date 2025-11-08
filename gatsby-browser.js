@@ -1,11 +1,13 @@
-// custom typefaces
+// gatsby-browser.js
+// 自定义字体
 // import "@fontsource-variable/montserrat"
 // import "@fontsource/merriweather"
-// normalize CSS across browsers
+
+// 跨浏览器 CSS 标准化
 import "./src/normalize.css"
-// custom CSS styles
-import "./src/style.css"
-// gatsby-browser.js
+
+// Tailwind CSS 和自定义样式
 import "./src/styles/global.css"
-// Highlighting for code blocks
-import "prismjs/themes/prism.css"
+
+// 代码高亮主题
+import "prismjs/themes/prism-tomorrow.css"
