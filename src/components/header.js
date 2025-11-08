@@ -62,13 +62,14 @@ const Header = () => {
                 </nav>
 
                 <div className="flex items-center space-x-4">
-                    <LanguageSwitcher />
+
                     <Link
                         to={getLocalizedPath("/contact")}
                         className="btn-primary text-sm"
                     >
                         {t('header.freeConsultation')}
                     </Link>
+                    <LanguageSwitcher />
                 </div>
             </div>
 
