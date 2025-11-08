@@ -19,13 +19,15 @@ const ProductPage = ({ data, pageContext }) => {
                 title={product.frontmatter.title}
                 description={product.frontmatter.description}
             />
-            <div className="container mx-auto px-4 py-8">
-                <div className="max-w-4xl mx-auto">
+
+            {/* 使用内容容器居中 */}
+            <section className="py-16">
+                <div className="main-container">
                     <h1 className="text-3xl font-bold text-gray-800 mb-4">
                         {product.frontmatter.title}
                     </h1>
 
-                    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <div className="card p-6 mb-6">
                         <div className="flex flex-col md:flex-row gap-8">
                             <div className="md:w-2/3">
                                 <p className="text-gray-700 text-lg mb-6">
@@ -37,7 +39,7 @@ const ProductPage = ({ data, pageContext }) => {
                                     <ul className="space-y-2">
                                         {product.frontmatter.features && product.frontmatter.features.map((feature, index) => (
                                             <li key={index} className="flex items-center text-gray-700">
-                                                <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                                                <span className="w-2 h-2 bg-indigo-500 rounded-full mr-3"></span>
                                                 {feature}
                                             </li>
                                         ))}
@@ -48,7 +50,7 @@ const ProductPage = ({ data, pageContext }) => {
                             <div className="md:w-1/3">
                                 <div className="bg-gray-50 p-6 rounded-lg">
                                     <div className="text-center mb-4">
-                                        <span className="text-3xl font-bold text-blue-600">
+                                        <span className="text-3xl font-bold text-indigo-600">
                                             ¥{product.frontmatter.price}
                                         </span>
                                         {product.frontmatter.originalPrice && (
@@ -60,7 +62,7 @@ const ProductPage = ({ data, pageContext }) => {
 
                                     <a
                                         href={contactPath}
-                                        className="block w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 mb-3 text-center"
+                                        className="btn-primary block w-full mb-3 text-center"
                                     >
                                         立即购买
                                     </a>
@@ -86,7 +88,7 @@ const ProductPage = ({ data, pageContext }) => {
                         dangerouslySetInnerHTML={{ __html: product.html }}
                     />
                 </div>
-            </div>
+            </section>
         </Layout>
     )
 }

@@ -19,13 +19,15 @@ const ServicePage = ({ data }) => {
                 title={service.frontmatter.title}
                 description={service.frontmatter.description}
             />
-            <div className="container mx-auto px-4 py-8">
-                <div className="max-w-4xl mx-auto">
+
+            {/* 使用内容容器居中 */}
+            <section className="py-16">
+                <div className="main-container">
                     <h1 className="text-3xl font-bold text-gray-800 mb-4">
                         {service.frontmatter.title}
                     </h1>
 
-                    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <div className="card p-6 mb-6">
                         <div className="flex flex-col md:flex-row gap-8">
                             <div className="md:w-2/3">
                                 <p className="text-gray-700 text-lg mb-6">
@@ -85,7 +87,7 @@ const ServicePage = ({ data }) => {
 
                                     <a
                                         href={contactPath}
-                                        className="block w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 text-center"
+                                        className="btn-primary block w-full text-center"
                                     >
                                         定制方案
                                     </a>
@@ -104,7 +106,7 @@ const ServicePage = ({ data }) => {
                         dangerouslySetInnerHTML={{ __html: service.html }}
                     />
                 </div>
-            </div>
+            </section>
         </Layout>
     )
 }

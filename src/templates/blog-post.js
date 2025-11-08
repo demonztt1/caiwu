@@ -11,47 +11,56 @@ const BlogPostTemplate = ({
 
     return (
         <Layout location={location} title={siteTitle}>
-            <article
-                className="blog-post"
-                itemScope
-                itemType="http://schema.org/Article"
-            >
-                <header>
-                    <h1 itemProp="headline">{post.frontmatter.title}</h1>
-                    <p>{post.frontmatter.date}</p>
-                </header>
-                <section
-                    dangerouslySetInnerHTML={{ __html: post.html }}
-                    itemProp="articleBody"
-                />
-                <hr />
-            </article>
-            <nav className="blog-post-nav">
-                <ul
-                    style={{
-                        display: `flex`,
-                        flexWrap: `wrap`,
-                        justifyContent: `space-between`,
-                        listStyle: `none`,
-                        padding: 0,
-                    }}
-                >
-                    <li>
-                        {previous && (
-                            <Link to={previous.fields.slug} rel="prev">
-                                ← {previous.frontmatter.title}
-                            </Link>
-                        )}
-                    </li>
-                    <li>
-                        {next && (
-                            <Link to={next.fields.slug} rel="next">
-                                {next.frontmatter.title} →
-                            </Link>
-                        )}
-                    </li>
-                </ul>
-            </nav>
+
+            {/* 使用内容容器居中 */}
+            <section className="py-16">
+                <div className="main-container">
+                    <article
+                        className="blog-post"
+                        itemScope
+                        itemType="http://schema.org/Article"
+                    >
+                        <header className="mb-8">
+                            <h1 className="text-4xl font-bold text-gray-900 mb-4" itemProp="headline">
+                                {post.frontmatter.title}
+                            </h1>
+                            <p className="text-gray-600">{post.frontmatter.date}</p>
+                        </header>
+                        <section
+                            className="prose prose-lg max-w-none"
+                            dangerouslySetInnerHTML={{ __html: post.html }}
+                            itemProp="articleBody"
+                        />
+                    </article>
+
+                    <nav className="blog-post-nav mt-8 pt-6 border-t border-gray-200">
+                        <ul className="flex justify-between list-none p-0">
+                            <li>
+                                {previous && (
+                                    <Link
+                                        to={previous.fields.slug}
+                                        rel="prev"
+                                        className="text-indigo-600 hover:text-indigo-700"
+                                    >
+                                        ← {previous.frontmatter.title}
+                                    </Link>
+                                )}
+                            </li>
+                            <li>
+                                {next && (
+                                    <Link
+                                        to={next.fields.slug}
+                                        rel="next"
+                                        className="text-indigo-600 hover:text-indigo-700"
+                                    >
+                                        {next.frontmatter.title} →
+                                    </Link>
+                                )}
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </section>
         </Layout>
     )
 }

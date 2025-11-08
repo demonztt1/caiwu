@@ -10,7 +10,8 @@ const Footer = () => {
 
     return (
         <footer className="bg-gray-800 text-white">
-            <div className="container mx-auto px-4 py-8">
+            {/* 使用 footer-container 限制宽度 */}
+            <div className="footer-container py-12">
                 <div className="grid md:grid-cols-4 gap-8">
                     {/* Company Info */}
                     <div className="md:col-span-2">

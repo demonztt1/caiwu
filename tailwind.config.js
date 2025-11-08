@@ -9,16 +9,23 @@ module.exports = {
         extend: {
             colors: {
                 primary: {
-                    50: '#eff6ff',
-                    100: '#dbeafe',
-                    200: '#bfdbfe',
-                    300: '#93c5fd',
-                    400: '#60a5fa',
-                    500: '#3b82f6',
-                    600: '#2563eb',
-                    700: '#1d4ed8',
-                    800: '#1e40af',
-                    900: '#1e3a8a',
+                    50: '#eef2ff',
+                    100: '#e0e7ff',
+                    200: '#c7d2fe',
+                    300: '#a5b4fc',
+                    400: '#818cf8',
+                    500: '#6366f1',
+                    600: '#4f46e5',
+                    700: '#4338ca',
+                    800: '#3730a3',
+                    900: '#312e81',
+                },
+                indigo: {
+                    50: '#eef2ff',
+                    100: '#e0e7ff',
+                    500: '#6366f1',
+                    600: '#4f46e5',
+                    700: '#4338ca',
                 },
                 gray: {
                     50: '#f9fafb',
@@ -34,22 +41,17 @@ module.exports = {
                 }
             },
             fontFamily: {
-                'sans': ['Inter', 'system-ui', 'sans-serif'],
+                'sans': ['system-ui', 'sans-serif'],
                 'serif': ['Georgia', 'serif'],
             },
             animation: {
                 'fade-in': 'fadeIn 0.6s ease-in-out',
                 'slide-up': 'slideUp 0.6s ease-out',
-                'bounce-slow': 'bounce 2s infinite',
             },
             spacing: {
                 '18': '4.5rem',
-                '88': '22rem',
-                '128': '32rem',
             }
         },
     },
-    plugins: [
-        require('@tailwindcss/typography'),
-    ],
+    plugins: [],
 }

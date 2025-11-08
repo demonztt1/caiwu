@@ -20,38 +20,33 @@
 
 /* 组件样式 */
 @layer components {
-    /* 主容器 - 限制最大宽度并居中 */
-    .container {
-        @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+    /* 所有容器类 - 确保都有明确的宽度限制 */
+    .container,
+    .nav-container,
+    .hero-container,
+    .footer-container,
+    .content-container {
+        @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full;
+        box-sizing: border-box;
     }
 
-    /* 内容区域容器 */
+    /* 内容区域容器 - 更窄一些，适合阅读 */
     .content-container {
         @apply max-w-4xl mx-auto px-4 sm:px-6 lg:px-8;
     }
-
-    /* 导航容器 */
-    .nav-container {
-        @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+    .main-container {
+        @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full;
     }
-
-    /* Hero 区域容器 */
-    .hero-container {
-        @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+    .multilingual-content {
+        width: 100%;
     }
-
-    /* Footer 容器 */
-    .footer-container {
-        @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
-    }
-
     /* 按钮 */
     .btn {
         @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md transition-colors duration-200;
     }
 
     .btn-primary {
-        @apply btn bg-blue-600 text-white hover:bg-blue-700;
+        @apply btn bg-indigo-600 text-white hover:bg-indigo-700;
     }
 
     .btn-secondary {
@@ -65,11 +60,20 @@
 
     /* 导航链接 */
     .nav-link {
-        @apply text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200;
+        @apply text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200;
     }
 
     .nav-link.active {
-        @apply text-blue-600 bg-blue-50;
+        @apply text-indigo-600 bg-indigo-50;
+    }
+
+    /* 表单 */
+    .form-input {
+        @apply block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500;
+    }
+
+    .form-label {
+        @apply block text-sm font-medium text-gray-700 mb-1;
     }
 }
 
@@ -77,11 +81,6 @@
 @layer utilities {
     .text-balance {
         text-wrap: balance;
-    }
-
-    /* 限制内容宽度 */
-    .max-content {
-        @apply max-w-4xl mx-auto;
     }
 }
 
@@ -116,9 +115,61 @@
     }
 }
 
+/* Hero 区域背景样式 - 确保这些类有明确的背景定义 */
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.hero-section-alt {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.hero-section-modern {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.hero-section-elegant {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+}
+/* 在 global.css 中添加更多 Hero 背景选项 */
+
+/* 专业蓝色渐变 */
+.hero-section-professional {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* 温暖橙色渐变 */
+.hero-section-warm {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+/* 清新绿色渐变 */
+.hero-section-fresh {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+/* 深色专业渐变 */
+.hero-section-dark {
+    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+}
+
+/* 紫色渐变 */
+.hero-section-purple {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+}
+
+/* 红色渐变 */
+.hero-section-red {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+}
+
+/* 金色渐变 */
+.hero-section-gold {
+    background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+}
 /* 博客内容样式 */
 .prose {
-    @apply max-w-4xl mx-auto;
+    @apply max-w-none;
 }
 
 .prose h2 {
@@ -133,6 +184,11 @@
     @apply rounded-lg shadow-md my-6;
 }
 
+/* 确保所有内容区域都有合适的间距 */
+section {
+    @apply w-full;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
     .container,
@@ -141,9 +197,5 @@
     .hero-container,
     .footer-container {
         @apply px-4;
-    }
-
-    .prose {
-        @apply text-base;
     }
 }
