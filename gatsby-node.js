@@ -1,7 +1,7 @@
 const path = require(`path`)
 const { createFilePath } = require(`gatsby-source-filesystem`)
 const { languageCodes, defaultLanguage } = require('./src/config/languages')
-
+// 在 createPages 函数中添加联系页面创建
 exports.createPages = async ({ graphql, actions, reporter }) => {
     const { createPage } = actions
 
@@ -16,7 +16,6 @@ exports.createPages = async ({ graphql, actions, reporter }) => {
     const contactPage = path.resolve(`./src/templates/contact-page.js`)
     const blogPage = path.resolve(`./src/templates/blog-page.js`)
 
-    // 获取所有页面内容
     // 获取所有页面内容
     const result = await graphql(`
     {
@@ -156,6 +155,18 @@ exports.createPages = async ({ graphql, actions, reporter }) => {
             },
         })
         console.log(`创建博客列表页: ${blogPath}`)
+
+        // 联系页面 - 新增：为每种语言创建联系页面
+        const contactPath = lang === defaultLanguage ? '/contact' : `/${lang}/contact`
+        createPage({
+            path: contactPath,
+            component: contactPage,
+            context: {
+                language: lang,
+                fallback: true // 设置为 true 以便在没有 Markdown 内容时显示默认内容
+            },
+        })
+        console.log(`创建联系页面: ${contactPath}`)
     })
 
     console.log('页面创建完成')

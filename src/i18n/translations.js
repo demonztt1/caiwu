@@ -92,6 +92,16 @@ export const translations = {
                 title: "我们的服务",
                 heading: "我们的服务",
                 description: "我们提供全方位的国际财税和商务服务，帮助企业应对复杂的全球税务环境，实现可持续发展。",
+                "tax": "税务筹划",
+                "taxDesc": "国际税务优化方案",
+                "compliance": "财税合规",
+                "complianceDesc": "确保企业合规运营",
+                "business": "商务咨询",
+                "businessDesc": "全面的商务支持服务",
+                "ai": "AI内容服务",
+                "aiDesc": "多语言内容生成",
+
+
                 serviceList: [
                     {
                         title: "国际税务筹划",
@@ -125,6 +135,14 @@ export const translations = {
                 }
             },
             contact: {
+                "wechat": "微信",
+                "selectService": "选择咨询服务",
+                "contactChannels": "联系渠道",
+                "timezone": "时区",
+                "supportLanguages": "支持语言",
+                "wechatConsult": "微信咨询",
+                "scanQRCode": "扫描二维码添加客服微信",
+
                 title: "联系我们",
                 heading: "联系我们",
                 contactInfo: "联系信息",
@@ -280,6 +298,15 @@ export const translations = {
                 title: "Our Services",
                 heading: "Our Services",
                 description: "We provide comprehensive international financial, tax, and business services to help enterprises navigate complex global tax environments and achieve sustainable development.",
+                "tax": "Tax Planning",
+                "taxDesc": "International tax optimization solutions",
+                "compliance": "Financial Compliance",
+                "complianceDesc": "Ensure corporate compliance operations",
+                "business": "Business Consulting",
+                "businessDesc": "Comprehensive business support services",
+                "ai": "AI Content Services",
+                "aiDesc": "Multilingual content generation",
+
                 serviceList: [
                     {
                         title: "International Tax Planning",
@@ -313,6 +340,13 @@ export const translations = {
                 }
             },
             contact: {
+                "wechat": "WeChat",
+                "selectService": "Select Consultation Service",
+                "contactChannels": "Contact Channels",
+                "timezone": "Timezone",
+                "supportLanguages": "Support Languages",
+                "wechatConsult": "WeChat Consultation",
+                "scanQRCode": "Scan QR code to add customer service",
                 title: "Contact Us",
                 heading: "Contact Us",
                 contactInfo: "Contact Information",
