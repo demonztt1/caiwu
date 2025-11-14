@@ -1,13 +1,20 @@
 // gatsby-browser.js
-// 自定义字体
-// import "@fontsource-variable/montserrat"
-// import "@fontsource/merriweather"
-
-// 跨浏览器 CSS 标准化
+import React from 'react'
+import { Buffer } from 'buffer'
+import { WalletProvider } from './src/contexts/wallet-context'
 import "./src/normalize.css"
-
-// Tailwind CSS 和自定义样式
 import "./src/styles/global.css"
-
-// 代码高亮主题
 import "prismjs/themes/prism-tomorrow.css"
+
+// 在浏览器环境中提供全局 Buffer
+if (typeof window !== 'undefined') {
+    window.Buffer = Buffer
+}
+
+export const wrapRootElement = ({ element }) => {
+    return (
+        <WalletProvider>
+            {element}
+        </WalletProvider>
+    )
+}

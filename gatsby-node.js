@@ -1,6 +1,28 @@
+// gatsby-node.js
 const path = require(`path`)
 const { createFilePath } = require(`gatsby-source-filesystem`)
 const { languageCodes, defaultLanguage } = require('./src/config/languages')
+
+// 简化Webpack配置，只包含必要的polyfill
+exports.onCreateWebpackConfig = ({ actions, stage }) => {
+    actions.setWebpackConfig({
+        resolve: {
+            fallback: {
+                "crypto": require.resolve("crypto-browserify"),
+                "stream": require.resolve("stream-browserify"),
+                "assert": require.resolve("assert/"),
+                "buffer": require.resolve("buffer/"),
+                "process": require.resolve("process/browser")
+            }
+        },
+        // 为浏览器环境提供 Buffer
+        plugins: stage === 'build-javascript' ? [
+            new (require('webpack').ProvidePlugin)({
+                Buffer: ['buffer', 'Buffer'],
+            })
+        ] : []
+    })
+}
 // 在 createPages 函数中添加联系页面创建
 exports.createPages = async ({ graphql, actions, reporter }) => {
     const { createPage } = actions

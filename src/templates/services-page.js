@@ -1,17 +1,43 @@
-import React from "react"
+// src/templates/services-page.js (更新版本)
+import React, { useState } from "react"
 import { graphql } from "gatsby"
 import Layout from "../components/layout"
 import Seo from "../components/seo"
 import { useTranslation } from "../hooks/use-translation"
 import { useLocalizedPath } from "../hooks/use-localized-path"
 
+
+import SimplePaymentFlow from '../components/simple-payment-flow'
+
 const ServicePage = ({ data }) => {
     const service = data.markdownRemark
     const { t } = useTranslation()
     const { getLocalizedPath } = useLocalizedPath()
+    const [showPayment, setShowPayment] = useState(false)
 
-    // 获取联系页面的本地化路径
     const contactPath = getLocalizedPath("/contact")
+
+    if (showPayment) {
+        return (
+            <Layout>
+                <Seo title={`支付 - ${service.frontmatter.title}`} />
+                <section className="py-16">
+                    <div className="main-container">
+                        <button
+                            onClick={() => setShowPayment(false)}
+                            className="mb-6 btn-secondary"
+                        >
+                            ← 返回服务详情
+                        </button>
+                        <SimplePaymentFlow
+                            service={service.frontmatter}
+                            amount={service.frontmatter.price}
+                        />
+                    </div>
+                </section>
+            </Layout>
+        )
+    }
 
     return (
         <Layout>
@@ -20,7 +46,6 @@ const ServicePage = ({ data }) => {
                 description={service.frontmatter.description}
             />
 
-            {/* 使用内容容器居中 */}
             <section className="py-16">
                 <div className="main-container">
                     <h1 className="text-3xl font-bold text-gray-800 mb-4">
@@ -78,12 +103,12 @@ const ServicePage = ({ data }) => {
                                         )}
                                     </div>
 
-                                    <a
-                                        href={contactPath}
+                                    <button
+                                        onClick={() => setShowPayment(true)}
                                         className="block w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition duration-300 mb-3 text-center"
                                     >
-                                        立即咨询
-                                    </a>
+                                        USDT立即支付
+                                    </button>
 
                                     <a
                                         href={contactPath}
@@ -93,7 +118,7 @@ const ServicePage = ({ data }) => {
                                     </a>
 
                                     <div className="mt-4 text-center text-sm text-gray-600">
-                                        <p>专业顾问1对1服务</p>
+                                        <p>支持Solana USDT支付</p>
                                         <p>签订正式服务合同</p>
                                     </div>
                                 </div>
