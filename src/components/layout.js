@@ -4,6 +4,7 @@ import { useStaticQuery, graphql } from "gatsby"
 import Header from "./header"
 import Footer from "./footer"
 import { useTranslation } from "../hooks/use-translation"
+import { useGoogleAnalytics } from "../hooks/use-google-analytics"
 
 const Layout = ({ children }) => {
     const data = useStaticQuery(graphql`
@@ -15,6 +16,7 @@ const Layout = ({ children }) => {
       }
     }
   `)
+    useGoogleAnalytics()
 
     const { t } = useTranslation()
 

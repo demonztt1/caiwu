@@ -91,12 +91,29 @@ module.exports = {
                 icon: `src/images/icon.png`,
             },
         },
+        // 🚀 新增：推荐用于 GA4 的 gatsby-plugin-google-gtag 配置
         {
-            resolve: `gatsby-plugin-google-analytics`,
+            resolve: `gatsby-plugin-google-gtag`,
             options: {
-                trackingId: process.env.GA_TRACKING_ID || "YOUR_GA_TRACKING_ID",
+                // 将您的 GA4 测量 ID 放入 trackingIds 数组
+                trackingIds: [
+                    process.env.GA_TRACKING_ID || "G-SKCJ9LND8J" // 使用环境变量或默认值
+                ],
+                // 默认的 gtag 配置
+                gtagConfig: {
+                    optimize_id: process.env.GTM_TRACKING_ID || "OPT-XXXXXXX", // 如果使用 GTM/Optimize
+                    anonymize_ip: true,
+                    cookie_expires: 0,
+                },
+                // 插件配置
+                pluginConfig: {
+                    head: true, // 将跟踪代码放在 head 中
+                    respectDNT: true, // 尊重 Do Not Track
+                    exclude: ["/preview/**"], // 排除某些路径
+                },
             },
         },
+        // 💡 提示：原有的 gatsby-plugin-google-analytics 已被移除
         `gatsby-plugin-offline`,
     ],
 }

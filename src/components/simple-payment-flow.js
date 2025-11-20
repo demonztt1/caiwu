@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useWallet } from '../contexts/wallet-context';
 import { createTransferTransaction, checkTokenBalance } from '../utils/solana-payment';
-
+import { trackPaymentStart, trackPaymentComplete, trackButtonClick } from '../hooks/use-google-analytics'
 const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
     const { publicKey, connected, connectWallet, sendTransaction } = useWallet();
 
@@ -35,6 +35,9 @@ const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
 
     // 1. 创建订单
     const createOrder = async () => {
+        trackPaymentStart(product.title)
+        trackButtonClick('payment_start-创建订单')
+
         if (!connected) {
             const success = await connectWallet();
             if (!success) return;
@@ -77,7 +80,8 @@ const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
     const executePayment = async () => {
         setLoading(true);
         setError('');
-
+        trackPaymentStart(product.title)
+        trackButtonClick('payment_start')
         try {
             // 检查余额是否足够
             if (tokenBalance < orderData.order.amount) {
@@ -175,6 +179,8 @@ const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
 
     // 3. 获取商品访问权限
     const grantProductAccess = async (orderId, accessToken) => {
+        trackPaymentComplete(product.title)
+
         try {
             const response = await fetch('http://localhost:3000/api/products/access', {
                 method: 'POST',
