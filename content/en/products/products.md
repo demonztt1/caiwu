@@ -1,9 +1,9 @@
 ---
-template: "products"
+template:  "products"
 language: "en"
-title: "Our Products"
-description: "Professional products and solutions"
-heading: "Our Product Solutions"
+title: "Our Product Solutions"
+description: "Comprehensive quantitative analysis and solutions"
+heading: "Product and Service Solutions"
 ---
 
-Explore the various professional products and services we offer for businesses.
+Explore the various quantitative analysis products and service solutions we offer for individuals and businesses.

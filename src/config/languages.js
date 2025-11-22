@@ -1,17 +1,20 @@
+// src/config/languages.js
 export const languages = {
     zh: {
         code: 'zh',
         name: '中文',
         nativeName: '中文',
         direction: 'ltr',
-        flag: '🇨🇳'
+        flag: '🇨🇳',
+        default: true
     },
     en: {
         code: 'en',
         name: 'English',
         nativeName: 'English',
         direction: 'ltr',
-        flag: '🇺🇸'
+        flag: '🇺🇸',
+        default: false
     }
 }
 

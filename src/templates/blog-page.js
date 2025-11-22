@@ -31,7 +31,12 @@ const BlogPage = ({ data, pageContext }) => {
     if (pageContext.fallback && posts.length === 0) {
         return (
             <Layout>
-                <Seo title={t('pages.blog.title')} />
+                <Seo
+                    title={t('pages.blog.title')}
+                    description={t('pages.blog.description', {
+                        defaultValue: "探索最新的量化分析见解、技术文章和行业动态"
+                    })}
+                />
 
                 {/* 使用内容容器居中 */}
                 <section className="py-16">
@@ -54,7 +59,12 @@ const BlogPage = ({ data, pageContext }) => {
 
     return (
         <Layout>
-            <Seo title={t('pages.blog.title')} />
+            <Seo
+                title={t('pages.blog.title')}
+                description={t('pages.blog.description', {
+                    defaultValue: "探索最新的量化分析见解、技术文章和行业动态"
+                })}
+            />
 
             {/* 使用内容容器居中 */}
             <section className="py-16">

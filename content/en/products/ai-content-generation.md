@@ -1,18 +1,19 @@
 ---
-template: "product"
+template:  "product"
 language: "en"
-title: "AI Content Generation Service"
-description: "Generate high-quality marketing content using artificial intelligence technology"
+title: "Decision Analysis and Visualization Service"
+description: "Professional decision model building and data visualization analysis"
 price: 2999
 originalPrice: 3999
-category: "Marketing Services"
+category: "Analysis Services"
 features:
-- "Article Writing"
-- "Social Media Content"
-- "Product Descriptions"
-- "Multilingual Content"
-- "SEO Optimization"
+- "Decision Model Construction"
+- "Data Visualization Display"
+- "State Space Simulation"
+- "Risk Assessment Analysis"
+- "Multi-scenario Planning"
 lang: en
 date: "2024-01-15"
 ---
-Use the most advanced AI technology to generate high-quality marketing content for your business.
+
+Professional decision analysis and visualization services that transform complex business data into intuitive charts and simulatable state spaces, helping you make wiser decisions.

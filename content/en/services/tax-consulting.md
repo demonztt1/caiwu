@@ -1,22 +1,23 @@
 ---
-template: "service"
+template:  "service"
 language: "en"
-title: "Professional Tax Consulting Service"
-description: "Professional international tax planning and compliance services"
+title: "Personal Growth Quantitative Analysis"
+description: "Professional personal capability assessment and growth path planning"
 price: 5000
 originalPrice: 6000
 duration: "1 month"
 features:
-  - "Tax structure optimization"
-  - "Cross-border tax planning"
-  - "Tax compliance review"
-  - "Tax risk assessment"
+  - "Three-dimensional personal capability assessment"
+  - "Quantitative growth path analysis"
+  - "Career development model construction"
+  - "Regular progress tracking and evaluation"
+  - "Personalized growth recommendations"
 process:
   - "Demand analysis and current situation assessment"
-  - "Develop tax planning solutions"
+  - "Develop quantitative growth solutions"
   - "Solution implementation and optimization"
   - "Follow-up tracking services"
 category: "Consulting Services"
 ---
 
-Detailed tax consulting service content...
+Professional personal growth quantitative analysis service, providing clear growth models and development path planning through technical, business, and management dimensions.

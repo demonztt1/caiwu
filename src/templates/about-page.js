@@ -12,7 +12,12 @@ const AboutPage = ({ data, pageContext }) => {
     if (pageContext.fallback && !pageData) {
         return (
             <Layout>
-                <Seo title={t('pages.about.title')} />
+                <Seo
+                    title={t('pages.about.title')}
+                    description={t('pages.about.description', {
+                        defaultValue: "了解元都逆熵团队的使命、愿景和核心优势"
+                    })}
+                />
 
                 {/* 使用内容容器居中 */}
                 <section className="py-16">
@@ -77,7 +82,10 @@ const AboutPage = ({ data, pageContext }) => {
 
     return (
         <Layout>
-            <Seo title={pageData.seo_title} />
+            <Seo
+                title={pageData.seo_title || pageData.heading}
+                description={pageData.seo_description || pageData.team_description}
+            />
 
             {/* 使用内容容器居中 */}
             <section className="py-16">

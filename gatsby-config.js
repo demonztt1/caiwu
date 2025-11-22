@@ -1,3 +1,4 @@
+// gatsby-config.js
 const { languageCodes } = require('./src/config/languages')
 
 // 动态创建文件系统配置
@@ -47,12 +48,12 @@ module.exports = {
     siteMetadata: {
         title: "元都-逆熵",
         titleTemplate: "%s · 量化万物，共建生态",
-        description: "专业的国际财税咨询、税务筹划、独立站建设和AI内容生成服务，为企业提供全方位的财税和数字化解决方案",
-        author: "财税专家团队",
-        siteUrl: "https://yuantax.com",
+        description: "从个人成长到组织决策，从数字策略到实体创新的全方位量化解决方案，构建智能、高效、可持续的未来生态",
+        author: "元都逆熵团队",
+        siteUrl: "https://www.rd-v6.com/",
         social: {
-            twitter: "@taxexpert",
-            linkedin: "company/tax-solutions"
+            twitter: "@yuandu_nisentropy",
+            linkedin: "company/yuandu-nisentropy"
         },
         languages: languageCodes,
         defaultLanguage: 'zh'
@@ -91,29 +92,24 @@ module.exports = {
                 icon: `src/images/icon.png`,
             },
         },
-        // 🚀 新增：推荐用于 GA4 的 gatsby-plugin-google-gtag 配置
         {
             resolve: `gatsby-plugin-google-gtag`,
             options: {
-                // 将您的 GA4 测量 ID 放入 trackingIds 数组
                 trackingIds: [
-                    process.env.GA_TRACKING_ID || "G-SKCJ9LND8J" // 使用环境变量或默认值
+                    process.env.GA_TRACKING_ID || "G-SKCJ9LND8J"
                 ],
-                // 默认的 gtag 配置
                 gtagConfig: {
-                    optimize_id: process.env.GTM_TRACKING_ID || "OPT-XXXXXXX", // 如果使用 GTM/Optimize
+                    optimize_id: process.env.GTM_TRACKING_ID || "OPT-XXXXXXX",
                     anonymize_ip: true,
                     cookie_expires: 0,
                 },
-                // 插件配置
                 pluginConfig: {
-                    head: true, // 将跟踪代码放在 head 中
-                    respectDNT: true, // 尊重 Do Not Track
-                    exclude: ["/preview/**"], // 排除某些路径
+                    head: true,
+                    respectDNT: true,
+                    exclude: ["/preview/**"],
                 },
             },
         },
-        // 💡 提示：原有的 gatsby-plugin-google-analytics 已被移除
         `gatsby-plugin-offline`,
     ],
 }

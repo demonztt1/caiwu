@@ -182,12 +182,11 @@ const MultiLanguageContact = ({ currentLanguage }) => {
             </div>
 
             {/* 微信二维码弹窗 */}
+            // 可以添加一个手动输入微信号的备选方案
             {showWechatModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-lg text-center max-w-sm">
-                        <h3 className="text-xl font-semibold mb-4">
-                            {t('contact.wechatConsult', '微信咨询')}
-                        </h3>
+                        {/* 二维码部分 */}
                         <img
                             src={`/images/wechat-${currentLanguage}.jpg`}
                             alt="WeChat QR Code"
@@ -196,15 +195,28 @@ const MultiLanguageContact = ({ currentLanguage }) => {
                                 e.target.src = '/images/wechat-default.jpg'
                             }}
                         />
-                        <p className="text-gray-600 mb-2">
-                            {t('contact.scanQRCode', '扫描二维码添加客服微信')}
-                        </p>
-                        <p className="text-sm text-gray-500 mb-4">
-                            ID: {currentConfig.wechat}
-                        </p>
+
+                        {/* 手动输入备选方案 */}
+                        <div className="mt-4 p-4 bg-yellow-50 rounded-lg">
+                            <p className="text-sm text-gray-600 mb-2">
+                                如果二维码无法扫描，请手动搜索微信号：
+                            </p>
+                            <div className="flex items-center justify-center">
+                                <code className="bg-gray-100 px-3 py-1 rounded text-lg font-mono">
+                                    {currentConfig.wechat}
+                                </code>
+                                <button
+                                    onClick={() => navigator.clipboard.writeText(currentConfig.wechat)}
+                                    className="ml-2 text-blue-500 hover:text-blue-700"
+                                >
+                                    复制
+                                </button>
+                            </div>
+                        </div>
+
                         <button
                             onClick={() => setShowWechatModal(false)}
-                            className="btn-secondary w-full"
+                            className="btn-secondary w-full mt-4"
                         >
                             {t('common.close', '关闭')}
                         </button>

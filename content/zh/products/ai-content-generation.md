@@ -1,19 +1,19 @@
 ---
-template: "product"
+template:  "product"
 language: "zh"
-title: "AI内容生成服务"
-description: "利用人工智能技术生成高质量营销内容"
+title: "独立站与内容生态服务"
+description: "专业的独立站建设和AI内容生成，助力全球业务拓展"
 price: 2999
 originalPrice: 3999
-category: "营销服务"
+category: "数字化服务"
 features:
-- "文章写作"
-- "社交媒体内容"
-- "产品描述"
-- "多语言内容"
-- "SEO优化"
+- "多语言独立站建设"
+- "AI内容生成与优化"
+- "SEO搜索引擎优化"
+- "社交媒体内容策略"
+- "品牌内容生态构建"
 lang: zh
 date: 2024-01-15
 ---
 
-使用最先進的AI技術，為您的業務生成高質量的營銷內容。
+专业的独立站建设与AI内容生成服务，帮助您构建全球化的内容生态，实现业务的有效传播和用户连接。

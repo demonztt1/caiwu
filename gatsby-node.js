@@ -3,7 +3,7 @@ const path = require(`path`)
 const { createFilePath } = require(`gatsby-source-filesystem`)
 const { languageCodes, defaultLanguage } = require('./src/config/languages')
 
-// 简化Webpack配置，只包含必要的polyfill
+// Webpack配置保持不变...
 exports.onCreateWebpackConfig = ({ actions, stage }) => {
     actions.setWebpackConfig({
         resolve: {
@@ -15,7 +15,6 @@ exports.onCreateWebpackConfig = ({ actions, stage }) => {
                 "process": require.resolve("process/browser")
             }
         },
-        // 为浏览器环境提供 Buffer
         plugins: stage === 'build-javascript' ? [
             new (require('webpack').ProvidePlugin)({
                 Buffer: ['buffer', 'Buffer'],
@@ -23,211 +22,52 @@ exports.onCreateWebpackConfig = ({ actions, stage }) => {
         ] : []
     })
 }
-// 在 createPages 函数中添加联系页面创建
-exports.createPages = async ({ graphql, actions, reporter }) => {
-    const { createPage } = actions
-
-    // 定义模板
-    const blogPost = path.resolve(`./src/templates/blog-post.js`)
-    const productPage = path.resolve(`./src/templates/product-page.js`)
-    const homePage = path.resolve(`./src/templates/home-page.js`)
-    const servicesListPage = path.resolve(`./src/templates/services-list-page.js`)
-    const servicesPage = path.resolve(`./src/templates/services-page.js`)
-    const productsPage = path.resolve(`./src/templates/products-page.js`)
-    const aboutPage = path.resolve(`./src/templates/about-page.js`)
-    const contactPage = path.resolve(`./src/templates/contact-page.js`)
-    const blogPage = path.resolve(`./src/templates/blog-page.js`)
-
-    // 获取所有页面内容
-    const result = await graphql(`
-    {
-      allMarkdownRemark {
-        nodes {
-          id
-          fields {
-            slug
-            language
-          }
-          frontmatter {
-            template
-            language
-            category
-            title
-          }
-        }
-      }
-    }
-  `)
-
-    if (result.errors) {
-        reporter.panicOnBuild(
-            `There was an error loading markdown files`,
-            result.errors
-        )
-        return
-    }
-
-    const nodes = result.data.allMarkdownRemark.nodes
-
-    console.log(`找到 ${nodes.length} 个 Markdown 节点`)
-
-    // 为每个内容创建页面
-    nodes.forEach((node) => {
-        const { template } = node.frontmatter
-        const nodeLanguage = node.fields.language || defaultLanguage
-        let templateComponent
-        let path = node.fields.slug
-
-        console.log(`处理节点: ${node.frontmatter.title}, 语言: ${nodeLanguage}, slug: ${path}, 模板: ${template}`)
-
-        // 修复路径生成逻辑
-        if (nodeLanguage !== defaultLanguage) {
-            // 对于非默认语言，确保路径包含语言前缀
-            if (path === '/') {
-                path = `/${nodeLanguage}`
-            } else if (!path.startsWith(`/${nodeLanguage}`)) {
-                path = `/${nodeLanguage}${path}`
-            }
-        } else {
-            // 对于默认语言，确保路径不包含语言前缀
-            if (path.startsWith(`/${defaultLanguage}`)) {
-                path = path.replace(`/${defaultLanguage}`, '') || '/'
-            }
-        }
-
-        // 根据模板选择组件
-        if (template === 'home') {
-            templateComponent = homePage
-            // 首页特殊处理
-            path = nodeLanguage === defaultLanguage ? '/' : `/${nodeLanguage}`
-        } else if (template === 'service') {
-            templateComponent = servicesPage
-        } else if (template === 'services') {
-            templateComponent = servicesListPage
-        } else if (template === 'product') {
-            templateComponent = productPage
-        } else if (template === 'products') {
-            templateComponent = productsPage
-        } else if (template === 'blog') {
-            // 区分博客列表页和博客文章
-            const isBlogList = path.endsWith('/blog/') || path === '/blog' || path === `/${nodeLanguage}/blog` || path === `/${nodeLanguage}/blog/`
-            templateComponent = isBlogList ? blogPage : blogPost
-        } else if (template === 'about') {
-            templateComponent = aboutPage
-        } else if (template === 'contact') {
-            templateComponent = contactPage
-        } else {
-            // 默认使用博客文章模板
-            templateComponent = blogPost
-        }
-
-        console.log(`创建页面: ${path}, 语言: ${nodeLanguage}, 模板: ${template}`)
-
-        createPage({
-            path: path,
-            component: templateComponent,
-            context: {
-                id: node.id,
-                language: nodeLanguage,
-                // 为博客文章添加上下文
-                ...(template === 'blog' && !path.includes('/blog/') && {
-                    previousPostId: null, // 这里需要根据实际情况设置
-                    nextPostId: null
-                })
-            },
-        })
-    })
-
-    // 为每种语言创建列表页面
-    languageCodes.forEach(lang => {
-        console.log(`为语言 ${lang} 创建列表页面`)
-
-        // 服务列表页面
-        const servicesPath = lang === defaultLanguage ? '/services' : `/${lang}/services`
-        createPage({
-            path: servicesPath,
-            component: servicesListPage,
-            context: {
-                language: lang,
-                fallback: false // 明确设置回退标志
-            },
-        })
-        console.log(`创建服务列表页: ${servicesPath}`)
-
-        // 产品列表页面
-        const productsPath = lang === defaultLanguage ? '/products' : `/${lang}/products`
-        createPage({
-            path: productsPath,
-            component: productsPage,
-            context: {
-                language: lang,
-                fallback: false
-            },
-        })
-        console.log(`创建产品列表页: ${productsPath}`)
-
-        // 博客列表页面
-        const blogPath = lang === defaultLanguage ? '/blog' : `/${lang}/blog`
-        createPage({
-            path: blogPath,
-            component: blogPage,
-            context: {
-                language: lang,
-                fallback: false
-            },
-        })
-        console.log(`创建博客列表页: ${blogPath}`)
-
-        // 联系页面 - 新增：为每种语言创建联系页面
-        const contactPath = lang === defaultLanguage ? '/contact' : `/${lang}/contact`
-        createPage({
-            path: contactPath,
-            component: contactPage,
-            context: {
-                language: lang,
-                fallback: true // 设置为 true 以便在没有 Markdown 内容时显示默认内容
-            },
-        })
-        console.log(`创建联系页面: ${contactPath}`)
-    })
-
-    console.log('页面创建完成')
-}
 
 exports.onCreateNode = ({ node, actions, getNode }) => {
     const { createNodeField } = actions
 
     if (node.internal.type === `MarkdownRemark`) {
         const fileNode = getNode(node.parent)
-        const relativePath = fileNode.relativePath
+        const relativePath = fileNode.relativePath // 例如: "zh/services/decision-analysis.md"
 
-        console.log(`处理文件: ${relativePath}`)
-
-        // 动态语言检测 - 从文件路径推断
+        // 1. 语言检测
         let detectedLanguage = defaultLanguage
+        const pathParts = relativePath.split('/') // ["zh", "services", "decision-analysis.md"]
 
-        // 从文件路径中提取语言代码
-        const pathParts = relativePath.split('/')
-        if (pathParts.length > 0) {
-            const possibleLang = pathParts[0]
-            // 检查是否是支持的语言代码
-            if (languageCodes.includes(possibleLang)) {
-                detectedLanguage = possibleLang
-            }
+        if (pathParts.length > 0 && languageCodes.includes(pathParts[0])) {
+            detectedLanguage = pathParts[0]
         }
 
-        // 优先使用 frontmatter 中指定的语言，但如果 frontmatter 中语言为空，则使用检测到的语言
         const finalLanguage = node.frontmatter?.language || detectedLanguage
 
-        // 生成基本 slug（不包含语言前缀）
-        let slug = createFilePath({ node, getNode })
+        // 2. 自定义 Slug 生成逻辑
+        // 目标：无论什么语言，Slug 字段都应该是干净的 "/category/name" 格式 (不含语言前缀)
+        let slug = ''
 
-        // 对于首页，slug 应该是根路径
         if (node.frontmatter?.template === 'home') {
             slug = '/'
+        } else {
+            // 移除文件名后缀
+            const parsedPath = path.parse(relativePath)
+            const fileName = parsedPath.name === 'index' ? '' : parsedPath.name
+
+            // 移除语言文件夹，保留中间的目录结构 (如 services, products, blog)
+            // pathParts[0] 是语言代码 (zh, en)，我们跳过它
+            const directoryParts = pathParts.slice(1, pathParts.length - 1)
+
+            // 重新组装路径
+            // 如果 directoryParts 是 ['services']，fileName 是 'decision-analysis'
+            // 结果: /services/decision-analysis
+            const folderPath = directoryParts.join('/')
+
+            slug = `/${folderPath}/${fileName}`
+
+            // 清理多余的斜杠 (例如 index 文件可能导致结尾双斜杠)
+            slug = slug.replace(/\/+/g, '/').replace(/\/$/, '')
+            if (slug === '') slug = '/'
         }
 
-        console.log(`文件: ${relativePath}, 检测语言: ${detectedLanguage}, 最终语言: ${finalLanguage}, slug: ${slug}`)
+        console.log(`文件: ${relativePath} -> 语言: ${finalLanguage} -> Slug: ${slug}`)
 
         createNodeField({
             name: `slug`,
@@ -241,28 +81,150 @@ exports.onCreateNode = ({ node, actions, getNode }) => {
             value: finalLanguage,
         })
 
-        // 同时将语言保存到 frontmatter 中，确保查询一致性
+        // 确保 frontmatter 也有语言字段
         if (!node.frontmatter.language) {
             node.frontmatter.language = finalLanguage
         }
     }
 }
 
+exports.createPages = async ({ graphql, actions, reporter }) => {
+    const { createPage } = actions
+
+    // 模板路径
+    const templates = {
+        blog: path.resolve(`./src/templates/blog-post.js`),
+        blogList: path.resolve(`./src/templates/blog-page.js`),
+        product: path.resolve(`./src/templates/product-page.js`),
+        productsList: path.resolve(`./src/templates/products-page.js`),
+        service: path.resolve(`./src/templates/services-page.js`),
+        servicesList: path.resolve(`./src/templates/services-list-page.js`),
+        home: path.resolve(`./src/templates/home-page.js`),
+        about: path.resolve(`./src/templates/about-page.js`),
+        contact: path.resolve(`./src/templates/contact-page.js`),
+    }
+
+    const result = await graphql(`
+    {
+      allMarkdownRemark {
+        nodes {
+          id
+          fields {
+            slug
+            language
+          }
+          frontmatter {
+            template
+          }
+        }
+      }
+    }
+  `)
+
+    if (result.errors) {
+        reporter.panicOnBuild(`Error loading markdown files`, result.errors)
+        return
+    }
+
+    const nodes = result.data.allMarkdownRemark.nodes
+
+    // 1. 创建内容页面
+    nodes.forEach((node) => {
+        const { template } = node.frontmatter
+        const language = node.fields.language
+        const slug = node.fields.slug
+
+        let pagePath = ''
+
+
+        if (language === defaultLanguage) {
+            pagePath = slug === '/' ? '/' : slug
+        } else {
+            pagePath = slug === '/' ? `/${language}` : `/${language}${slug}`
+        }
+
+        // 特殊处理首页
+        if (template === 'home' && slug === '/') {
+            pagePath = language === defaultLanguage ? '/' : `/${language}`
+        }
+
+        let component = templates.blog // 默认
+
+        if (template === 'home') component = templates.home
+        else if (template === 'service') component = templates.service
+        else if (template === 'product') component = templates.product
+        else if (template === 'blog') component = templates.blog
+        else if (template === 'about') component = templates.about
+        else if (template === 'contact') component = templates.contact
+
+        // 博客列表页特殊处理 (如果用户创建了专门的 blog.md)
+        if (template === 'blog' && (slug === '/blog' || slug === '/blog/')) {
+            component = templates.blogList
+        }
+
+// 在 gatsby-node.js 的 createPages 函数中，添加调试日志
+        console.log(`创建页面: ${pagePath} (Lang: ${language}, Tpl: ${template}, Component: ${component})`)
+
+        createPage({
+            path: pagePath,
+            component: component,
+            context: {
+                id: node.id,
+                language: language,
+            },
+        })
+    })
+
+    // 2. 创建功能性列表页面 (Services List, Products List, Blog List)
+    languageCodes.forEach(lang => {
+        const prefix = lang === defaultLanguage ? '' : `/${lang}`
+
+        // Services List: /services 或 /en/services
+        createPage({
+            path: `${prefix}/services`,
+            component: templates.servicesList,
+            context: { language: lang, fallback: false },
+        })
+
+        // Products List: /products 或 /en/products
+        createPage({
+            path: `${prefix}/products`,
+            component: templates.productsList,
+            context: { language: lang, fallback: false },
+        })
+
+        // Blog List: /blog 或 /en/blog
+        createPage({
+            path: `${prefix}/blog`,
+            component: templates.blogList,
+            context: { language: lang, fallback: false },
+        })
+
+        // Contact Page: /contact 或 /en/contact (如果Markdown没覆盖到)
+        createPage({
+            path: `${prefix}/contact`,
+            component: templates.contact,
+            context: { language: lang, fallback: true },
+        })
+    })
+}
+
+// Schema Customization 保持不变...
+// 在 createSchemaCustomization 中更新
+// Schema Customization - 修复 solution_areas 类型定义
+// 在 gatsby-node.js 中更新 createSchemaCustomization
 exports.createSchemaCustomization = ({ actions }) => {
     const { createTypes } = actions
-
     createTypes(`
     type MarkdownRemark implements Node {
       frontmatter: Frontmatter
       fields: Fields
     }
     type Frontmatter {
-      title: String!
+      title: String
       description: String
-      date: Date @dateformat
       template: String
       language: String
-      category: String
       price: Int
       originalPrice: Int
       features: [String]
@@ -270,33 +232,21 @@ exports.createSchemaCustomization = ({ actions }) => {
       hero_subtitle: String
       hero_button: String
       services_title: String
-      services: [Service]
+      services_subtitle: String
+      solution_areas: [SolutionArea]
       seo_title: String
       seo_description: String
-      # 服务页面字段
-      heading: String
-      cta_title: String
-      cta_description: String
-      cta_button: String
-      # 关于页面字段
-      team_title: String
-      team_description: String
-      mission_title: String
-      mission_description: String
-      vision_title: String
-      vision_description: String
-      advantages_title: String
-      advantages: [String]
-      contact_button: String
-      # 服务详情页字段
-      icon: String
-      duration: String
       process: [String]
+      duration: String
+      # 添加缺失的 CTA 字段
+      cta_title: String
+      cta_subtitle: String
+      cta_button_primary: String
+      cta_button_secondary: String
     }
-    type Service {
+    type SolutionArea {
       title: String
       description: String
-      features: [String]
       icon: String
     }
     type Fields {

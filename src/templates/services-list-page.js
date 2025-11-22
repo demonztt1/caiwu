@@ -3,75 +3,76 @@ import { Link, graphql } from "gatsby"
 import Layout from "../components/layout"
 import Seo from "../components/seo"
 import { useTranslation } from "../hooks/use-translation"
-import {defaultLanguage, languages} from "../config/languages"
+import { useLocalizedPath } from "../hooks/use-localized-path"
 
 const ServicesListPage = ({ data, pageContext }) => {
     const services = data.allMarkdownRemark.nodes
     const { t } = useTranslation()
-    const { language } = pageContext
+    const { getLocalizedPath } = useLocalizedPath()
 
-    // 修复的本地化路径函数
-    const getLocalizedPath = (path, contentLanguage) => {
-        // 如果路径已经以语言前缀开头，先清理它
-        let cleanPath = path
-        Object.keys(languages).forEach(lang => {
-            if (path.startsWith(`/${lang}/`)) {
-                cleanPath = path.replace(`/${lang}`, '')
-            } else if (path === `/${lang}`) {
-                cleanPath = '/'
-            }
+    // 获取服务路径
+    const getServicePath = (slug) => {
+        return getLocalizedPath(slug)
+    }
+
+    // 回退情况 - 当没有对应语言的服务时显示默认内容
+    if (services.length === 0) {
+        // 使用翻译系统中的服务列表
+        const serviceList = t('services.serviceList', {
+            returnObjects: true,
+            defaultValue: []
         })
 
-        // 如果当前页面语言是默认语言，直接返回清理后的路径
-        if (pageContext.language === defaultLanguage) {
-            return cleanPath
-        } else {
-            // 否则添加当前页面语言前缀
-            return cleanPath === '/' ? `/${pageContext.language}` : `/${pageContext.language}${cleanPath}`
-        }
-    }
+        // 如果翻译系统中也没有服务列表，使用备用默认内容
+        const currentLangServices = serviceList.length > 0 ? serviceList : [
+            {
+                title: t('services.personal-growth.title', { defaultValue: "Personal Growth Analytics" }),
+                description: t('services.personal-growth.description', { defaultValue: "Clear quantitative models for personal development" }),
+                features: t('services.personal-growth.features', {
+                    returnObjects: true,
+                    defaultValue: ["Skills assessment", "Growth path planning", "Performance metrics", "Career development strategies"]
+                })
+            },
+            {
+                title: t('services.decision-analysis.title', { defaultValue: "Decision Analysis & Visualization" }),
+                description: t('services.decision-analysis.description', { defaultValue: "Transform complex ideas into intuitive visual charts" }),
+                features: t('services.decision-analysis.features', {
+                    returnObjects: true,
+                    defaultValue: ["Data visualization", "State space analysis", "Decision modeling", "Real-time scenario simulation"]
+                })
+            }
+        ]
 
-    // 获取固定页面的本地化路径
-    const getFixedLocalizedPath = (path) => {
-        if (pageContext.language === defaultLanguage) {
-            return path
-        } else {
-            return `/${pageContext.language}${path}`
-        }
-    }
-
-    // 如果有回退情况（没有对应语言的内容），显示默认内容
-    if (pageContext.fallback && services.length === 0) {
         return (
             <Layout>
-                <Seo title={t('pages.services.title')} />
+                <Seo title={t('pages.services.title', { defaultValue: "Our Services" })} />
 
-                {/* 使用内容容器居中 */}
                 <section className="py-16">
                     <div className="main-container">
                         <h1 className="text-3xl font-bold text-gray-800 mb-6">
-                            {t('pages.services.heading')}
+                            {t('pages.services.heading', { defaultValue: "Our Services" })}
                         </h1>
 
                         <div className="card p-6 mb-8">
                             <p className="text-gray-700 text-lg mb-6">
-                                {t('pages.services.description')}
+                                {t('pages.services.description', {
+                                    defaultValue: "We provide comprehensive quantitative solutions to support personal growth and business innovation."
+                                })}
                             </p>
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-6 mb-8">
-                            {t('pages.services.serviceList', { returnObjects: true }).map((service, index) => (
+                            {currentLangServices.map((service, index) => (
                                 <div key={index} className="card p-6 border-l-4 border-indigo-500">
-                                    <div className="flex items-start mb-4">
-                                        <span className="text-3xl mr-4">{service.icon}</span>
-                                        <div>
-                                            <h3 className="text-xl font-semibold text-gray-800 mb-2">{service.title}</h3>
-                                            <p className="text-gray-600 mb-4">{service.description}</p>
-                                        </div>
+                                    <div className="mb-4">
+                                        <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                                            {service.title}
+                                        </h3>
+                                        <p className="text-gray-600 mb-4">{service.description}</p>
                                     </div>
 
                                     <ul className="space-y-2">
-                                        {service.features.map((feature, featureIndex) => (
+                                        {service.features && service.features.map((feature, featureIndex) => (
                                             <li key={featureIndex} className="flex items-center text-gray-700">
                                                 <span className="w-2 h-2 bg-indigo-500 rounded-full mr-3"></span>
                                                 {feature}
@@ -84,11 +85,13 @@ const ServicesListPage = ({ data, pageContext }) => {
 
                         <div className="bg-indigo-50 rounded-lg p-6 text-center">
                             <h2 className="text-2xl font-semibold text-indigo-700 mb-4">
-                                {t('pages.services.cta.title')}
+                                {t('pages.services.cta.title', { defaultValue: "Ready to Get Started?" })}
                             </h2>
-                            <p className="text-gray-700 mb-4">{t('pages.services.cta.description')}</p>
-                            <Link to={getFixedLocalizedPath("/contact")} className="btn-primary">
-                                {t('pages.services.cta.button')}
+                            <p className="text-gray-700 mb-4">
+                                {t('pages.services.cta.description', { defaultValue: "Contact us for personalized solutions" })}
+                            </p>
+                            <Link to={getLocalizedPath("/contact")} className="btn-primary">
+                                {t('pages.services.cta.button', { defaultValue: "Consult Now" })}
                             </Link>
                         </div>
                     </div>
@@ -97,74 +100,62 @@ const ServicesListPage = ({ data, pageContext }) => {
         )
     }
 
+    // 正常情况 - 有服务数据时
     return (
         <Layout>
-            <Seo title={t('pages.services.title')} />
+            <Seo title={t('pages.services.title', { defaultValue: "Our Services" })} />
 
-            {/* 使用内容容器居中 */}
             <section className="py-16">
                 <div className="main-container">
                     <h1 className="text-3xl font-bold text-gray-800 mb-6">
-                        {t('pages.services.heading')}
+                        {t('pages.services.heading', { defaultValue: "Our Services" })}
                     </h1>
 
-                    {services.length === 0 ? (
-                        <div className="text-center py-12">
-                            <p className="text-gray-600 text-lg">
-                                {pageContext.language === 'zh'
-                                    ? '暂无服务内容'
-                                    : 'No services available'}
-                            </p>
-                        </div>
-                    ) : (
-                        <>
-                            <div className="card p-6 mb-8">
-                                <p className="text-gray-700 text-lg mb-6">
-                                    {t('pages.services.description')}
-                                </p>
-                            </div>
+                    <div className="card p-6 mb-8">
+                        <p className="text-gray-700 text-lg mb-6">
+                            {t('pages.services.description', {
+                                defaultValue: "We provide comprehensive quantitative solutions to support personal growth and business innovation."
+                            })}
+                        </p>
+                    </div>
 
-                            <div className="grid md:grid-cols-2 gap-6 mb-8">
-                                {services.map((service, index) => (
-                                    <div key={index} className="card p-6 border-l-4 border-indigo-500">
-                                        <div className="flex items-start mb-4">
-                                            <span className="text-3xl mr-4">{service.frontmatter.icon || '📊'}</span>
-                                            <div>
-                                                <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                                                    <Link
-                                                        to={getLocalizedPath(service.fields.slug, service.fields.language)}
-                                                        className="hover:text-indigo-600 transition duration-300"
-                                                    >
-                                                        {service.frontmatter.title}
-                                                    </Link>
-                                                </h3>
-                                                <p className="text-gray-600 mb-4">{service.frontmatter.description}</p>
-                                            </div>
-                                        </div>
+                    <div className="grid md:grid-cols-2 gap-6 mb-8">
+                        {services.map((service, index) => (
+                            <Link
+                                key={index}
+                                to={getServicePath(service.fields.slug)}
+                                className="card p-6 border-l-4 border-indigo-500 hover:shadow-lg transition-all duration-300 block"
+                            >
+                                <div className="mb-4">
+                                    <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                                        {service.frontmatter.title}
+                                    </h3>
+                                    <p className="text-gray-600 mb-4">{service.frontmatter.description}</p>
+                                </div>
 
-                                        <ul className="space-y-2">
-                                            {service.frontmatter.features && service.frontmatter.features.map((feature, featureIndex) => (
-                                                <li key={featureIndex} className="flex items-center text-gray-700">
-                                                    <span className="w-2 h-2 bg-indigo-500 rounded-full mr-3"></span>
-                                                    {feature}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                ))}
-                            </div>
+                                <ul className="space-y-2">
+                                    {service.frontmatter.features && service.frontmatter.features.map((feature, featureIndex) => (
+                                        <li key={featureIndex} className="flex items-center text-gray-700">
+                                            <span className="w-2 h-2 bg-indigo-500 rounded-full mr-3"></span>
+                                            {feature}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </Link>
+                        ))}
+                    </div>
 
-                            <div className="bg-indigo-50 rounded-lg p-6 text-center">
-                                <h2 className="text-2xl font-semibold text-indigo-700 mb-4">
-                                    {t('pages.services.cta.title')}
-                                </h2>
-                                <p className="text-gray-700 mb-4">{t('pages.services.cta.description')}</p>
-                                <Link to={getFixedLocalizedPath("/contact")} className="btn-primary">
-                                    {t('pages.services.cta.button')}
-                                </Link>
-                            </div>
-                        </>
-                    )}
+                    <div className="bg-indigo-50 rounded-lg p-6 text-center">
+                        <h2 className="text-2xl font-semibold text-indigo-700 mb-4">
+                            {t('pages.services.cta.title', { defaultValue: "Ready to Get Started?" })}
+                        </h2>
+                        <p className="text-gray-700 mb-4">
+                            {t('pages.services.cta.description', { defaultValue: "Contact us for personalized solutions" })}
+                        </p>
+                        <Link to={getLocalizedPath("/contact")} className="btn-primary">
+                            {t('pages.services.cta.button', { defaultValue: "Consult Now" })}
+                        </Link>
+                    </div>
                 </div>
             </section>
         </Layout>
@@ -194,7 +185,6 @@ export const query = graphql`
           title
           description
           features
-          icon
           price
           originalPrice
         }

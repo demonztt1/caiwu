@@ -3,7 +3,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useWallet } from '../contexts/wallet-context';
 import { createTransferTransaction, checkTokenBalance } from '../utils/solana-payment';
 import { trackPaymentStart, trackPaymentComplete, trackButtonClick } from '../hooks/use-google-analytics'
-const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
+
+// 修改组件以支持 product 和 service 两种类型
+const SimplePaymentFlow = ({ product, service, onPaymentSuccess }) => {
+    // 统一处理商品或服务
+    const item = product || service;
+    const itemType = service ? 'service' : 'product';
+
     const { publicKey, connected, connectWallet, sendTransaction } = useWallet();
 
     const [currentStep, setCurrentStep] = useState(1);
@@ -17,7 +23,6 @@ const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
     const checkTokenBalanceCustom = useCallback(async () => {
         if (connected && publicKey && orderData) {
             try {
-                // 使用订单中的代币地址检查余额
                 const balance = await checkTokenBalance(publicKey, orderData.order.tokenMintAddress);
                 setTokenBalance(balance);
             } catch (error) {
@@ -35,7 +40,7 @@ const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
 
     // 1. 创建订单
     const createOrder = async () => {
-        trackPaymentStart(product.title)
+        trackPaymentStart(item.title)
         trackButtonClick('payment_start-创建订单')
 
         if (!connected) {
@@ -53,8 +58,9 @@ const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    productId: product.id,
-                    userAddress: publicKey
+                    productId: item.id || `service_${item.title}`, // 为服务生成ID
+                    userAddress: publicKey,
+                    type: itemType // 添加类型标识
                 })
             });
 
@@ -74,13 +80,10 @@ const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
     };
 
     // 2. 执行支付
-// 在 simple-payment-flow.js 中修改 executePayment 函数
-
-// 2. 执行支付
     const executePayment = async () => {
         setLoading(true);
         setError('');
-        trackPaymentStart(product.title)
+        trackPaymentStart(item.title)
         trackButtonClick('payment_start')
         try {
             // 检查余额是否足够
@@ -90,13 +93,13 @@ const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
                 return;
             }
 
-            // 创建转账交易（包含支付摘要）
+            // 创建转账交易
             const transaction = await createTransferTransaction(
-                publicKey, // 确保使用当前连接的地址
+                publicKey,
                 orderData.order.merchantAddress,
                 orderData.order.amount,
                 orderData.order.tokenMintAddress,
-                orderData.paymentDigest, // 支付摘要
+                orderData.paymentDigest,
                 9
             );
 
@@ -104,7 +107,8 @@ const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
                 from: publicKey,
                 to: orderData.order.merchantAddress,
                 amount: orderData.order.amount,
-                digest: orderData.paymentDigest
+                digest: orderData.paymentDigest,
+                type: itemType
             });
 
             // 发送交易
@@ -133,7 +137,8 @@ const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
                     body: JSON.stringify({
                         orderId: orderData.order.orderId,
                         transactionSignature: signature,
-                        userAddress: publicKey // 确保传递当前支付地址
+                        userAddress: publicKey,
+                        type: itemType
                     })
                 });
 
@@ -143,14 +148,12 @@ const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
                     break;
                 }
 
-                // 如果是因为交易未确认，等待后重试
                 if (verifyResult.error && verifyResult.error.includes('未确认')) {
                     retries++;
                     await new Promise(resolve => setTimeout(resolve, 2000));
                     continue;
                 }
 
-                // 其他错误直接抛出
                 throw new Error(verifyResult.error);
             }
 
@@ -161,8 +164,13 @@ const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
             setPaymentData(verifyResult.data);
             setCurrentStep(3);
 
-            // 获取商品访问权限
-            await grantProductAccess(verifyResult.data.orderId, verifyResult.data.accessToken);
+            // 根据类型获取访问权限
+            if (itemType === 'product') {
+                await grantProductAccess(verifyResult.data.orderId, verifyResult.data.accessToken);
+            } else {
+                // 服务支付成功处理
+                await grantServiceAccess(verifyResult.data.orderId, verifyResult.data.accessToken);
+            }
 
             // 触发支付成功回调
             if (onPaymentSuccess) {
@@ -179,7 +187,7 @@ const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
 
     // 3. 获取商品访问权限
     const grantProductAccess = async (orderId, accessToken) => {
-        trackPaymentComplete(product.title)
+        trackPaymentComplete(item.title)
 
         try {
             const response = await fetch('http://localhost:3000/api/products/access', {
@@ -203,6 +211,43 @@ const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
             }
         } catch (err) {
             console.error('获取商品访问权限失败:', err);
+        }
+    };
+
+    // 4. 获取服务访问权限
+    const grantServiceAccess = async (orderId, accessToken) => {
+        trackPaymentComplete(item.title)
+
+        try {
+            const response = await fetch('http://localhost:3000/api/services/access', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    orderId,
+                    accessToken
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                setPaymentData(prev => ({
+                    ...prev,
+                    serviceInfo: result.data.serviceInfo,
+                    accessInfo: result.data.accessInfo
+                }));
+                setCurrentStep(4);
+            } else {
+                console.error('获取服务访问权限失败:', result.error);
+                // 即使获取服务信息失败，也标记为完成
+                setCurrentStep(4);
+            }
+        } catch (err) {
+            console.error('获取服务访问权限失败:', err);
+            // 即使获取服务信息失败，也标记为完成
+            setCurrentStep(4);
         }
     };
 
@@ -280,12 +325,17 @@ const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
                 {/* 步骤1: 创建订单 */}
                 {currentStep === 1 && (
                     <div className="text-center">
-                        <h3 className="text-lg font-semibold mb-4">创建支付订单</h3>
+                        <h3 className="text-lg font-semibold mb-4">
+                            {itemType === 'service' ? '创建服务订单' : '创建支付订单'}
+                        </h3>
                         <div className="bg-gray-50 p-4 rounded mb-4 text-left">
-                            <p><strong>商品:</strong> {product.title}</p>
-                            <p><strong>描述:</strong> {product.description}</p>
-                            <p><strong>金额:</strong> {product.price} {product.currency}</p>
-                            <p><strong>支付方式:</strong> Solana {product.currency}</p>
+                            <p><strong>{itemType === 'service' ? '服务' : '商品'}:</strong> {item.title}</p>
+                            <p><strong>描述:</strong> {item.description}</p>
+                            <p><strong>金额:</strong> {item.price} {item.currency}</p>
+                            <p><strong>支付方式:</strong> Solana {item.currency}</p>
+                            <p className="text-sm text-blue-600 mt-2">
+                                {itemType === 'service' ? '✅ 服务订单' : '🛒 商品订单'}
+                            </p>
                         </div>
                         <button
                             onClick={createOrder}
@@ -303,6 +353,7 @@ const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
                         <h3 className="text-lg font-semibold mb-4">确认支付</h3>
                         <div className="bg-yellow-50 p-4 rounded mb-4 text-left">
                             <p><strong>订单ID:</strong> {orderData.order.orderId}</p>
+                            <p><strong>类型:</strong> {itemType === 'service' ? '服务' : '商品'}</p>
                             <p><strong>金额:</strong> {orderData.order.amount} {orderData.order.currency}</p>
                             <p><strong>收款地址:</strong> {orderData.order.merchantAddress}</p>
                             <p className="text-xs break-all mt-2">
@@ -343,8 +394,9 @@ const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
                             <p><strong>订单ID:</strong> {paymentData.orderId}</p>
                             <p><strong>交易哈希:</strong> {paymentData.transactionSignature}</p>
                             <p><strong>支付时间:</strong> {formatTime(paymentData.paidAt)}</p>
+                            <p><strong>类型:</strong> {itemType === 'service' ? '服务' : '商品'}</p>
 
-                            {paymentData.accessInfo && (
+                            {itemType === 'product' && paymentData.accessInfo && (
                                 <div className="mt-3 p-3 bg-white rounded border">
                                     <h4 className="font-semibold mb-2">商品访问信息:</h4>
                                     <p><strong>访问码:</strong> {paymentData.accessInfo.accessCode}</p>
@@ -358,6 +410,16 @@ const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
                                     </p>
                                 </div>
                             )}
+
+                            {itemType === 'service' && (
+                                <div className="mt-3 p-3 bg-white rounded border">
+                                    <h4 className="font-semibold mb-2">服务购买成功!</h4>
+                                    <p>我们的客服人员将在24小时内联系您，为您安排服务。</p>
+                                    <p className="text-sm text-gray-600 mt-2">
+                                        如需立即咨询，请通过网站联系客服。
+                                    </p>
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex space-x-2">
@@ -368,7 +430,7 @@ const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
                                 新的支付
                             </button>
                             <button className="btn-primary flex-1">
-                                查看订单
+                                {itemType === 'service' ? '联系客服' : '查看订单'}
                             </button>
                         </div>
                     </div>
@@ -380,9 +442,9 @@ const SimplePaymentFlow = ({ product, onPaymentSuccess }) => {
                 <div className="mt-4 p-3 bg-gray-100 rounded text-xs">
                     <strong>调试信息:</strong>
                     <div>当前步骤: {currentStep}</div>
+                    <div>类型: {itemType}</div>
                     <div>钱包连接: {connected ? '已连接' : '未连接'}</div>
                     <div>订单ID: {orderData?.order?.orderId}</div>
-                    <div>代币地址: {orderData?.order?.tokenMintAddress}</div>
                 </div>
             )}
         </div>

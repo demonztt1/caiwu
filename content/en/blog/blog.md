@@ -1,9 +1,9 @@
 ---
-template: "blog"
+template:  "blog"
 language: "en"
-title: "Blog Articles"
-description: "Latest industry news and professional articles"
-heading: "Latest Articles"
+title: "Professional Insights"
+description: "Latest quantitative analysis insights and professional articles"
+heading: "Professional Insights and Case Studies"
 ---
 
-Welcome to read our professional blog to get the latest industry insights.
+Welcome to read our professional blog for the latest quantitative analysis insights and practical cases.

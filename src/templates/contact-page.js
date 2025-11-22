@@ -35,9 +35,9 @@ const ContactPage = ({ data, pageContext }) => {
                                             {t('pages.contact.address')}
                                         </h3>
                                         <p className="text-gray-600">
-                                            {language === 'zh' ? '北京市朝阳区金融街123号' :
+                                            {language === 'zh' ? '成都龙泉驿金融街123号' :
                                                 language === 'en' ? 'Financial Street 123, Chaoyang District, Beijing' :
-                                                    '北京市朝陽区金融街123号'}
+                                                    '成都龙泉驿金融街123号'}
                                         </p>
                                     </div>
 
@@ -130,9 +130,9 @@ const ContactPage = ({ data, pageContext }) => {
                                         {t('pages.contact.address')}
                                     </h3>
                                     <p className="text-gray-600">
-                                        {language === 'zh' ? '北京市朝阳区金融街123号' :
+                                        {language === 'zh' ? '成都龙泉驿金融街123号' :
                                             language === 'en' ? 'Financial Street 123, Chaoyang District, Beijing' :
-                                                '北京市朝陽区金融街123号'}
+                                                '成都龙泉驿金融街123号'}
                                     </p>
                                 </div>
 

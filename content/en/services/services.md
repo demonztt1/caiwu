@@ -1,9 +1,9 @@
 ---
-template: "services"
+template:  "services"
 language: "en"
-title: "Our Services"
-description: "We provide comprehensive international financial and business services"
-heading: "Our Professional Services"
+title: "Our Solutions"
+description: "Comprehensive quantitative solutions from personal growth to physical innovation"
+heading: "Six Professional Solutions"
 ---
 
-We are committed to providing the most professional financial and business solutions for enterprises.
+We are committed to providing comprehensive quantitative analysis solutions for individuals and enterprises, building intelligent, efficient, and sustainable future ecosystems.
