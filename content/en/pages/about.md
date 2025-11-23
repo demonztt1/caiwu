@@ -10,11 +10,11 @@ vision_title: Our Vision
 vision_description: To become a leader in quantitative analysis, promoting the practice and development of the "Quantify Everything, Build Ecosystem" concept.
 advantages_title: Our Advantages
 advantages:
-  - "Multi-dimensional quantitative analysis models"
-  - "Innovative technical solutions"
-  - "Personalized service plans"
-  - "Rapid response and efficient execution"
-  - "Continuous optimization and improvement"
+    - "Multi-dimensional quantitative analysis models"
+    - "Innovative technical solutions"
+    - "Personalized service plans"
+    - "Rapid response and efficient execution"
+    - "Continuous optimization and improvement"
 contact_button: Contact Us
 seo_title: About Us - Professional Quantitative Analysis Team
 ---

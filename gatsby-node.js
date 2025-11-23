@@ -234,7 +234,7 @@ exports.createSchemaCustomization = ({ actions }) => {
       services_title: String
       services_subtitle: String
       solution_areas: [SolutionArea]
-      seo_title: String
+    seo_title: String
       seo_description: String
       process: [String]
       duration: String
