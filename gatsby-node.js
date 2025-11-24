@@ -2,7 +2,10 @@
 const path = require(`path`)
 const { createFilePath } = require(`gatsby-source-filesystem`)
 const { languageCodes, defaultLanguage } = require('./src/config/languages')
-
+// 增加事件监听器限制
+if (process.env.NODE_ENV === 'production') {
+    require('events').EventEmitter.defaultMaxListeners = 100;
+}
 // Webpack配置保持不变...
 exports.onCreateWebpackConfig = ({ actions, stage }) => {
     actions.setWebpackConfig({
