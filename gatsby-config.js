@@ -45,6 +45,12 @@ languageCodes.forEach(lang => {
 })
 
 module.exports = {
+    flags: {
+        PRESERVE_WEBPACK_CACHE: false,
+        PRESERVE_FILE_DOWNLOAD_CACHE: false,
+        FAST_DEV: false,
+        DEV_SSR: false
+    },
     siteMetadata: {
         title: "元都-逆熵",
         titleTemplate: "%s · 量化万物，共建生态",
@@ -61,8 +67,27 @@ module.exports = {
     plugins: [
         `gatsby-plugin-react-helmet`,
         `gatsby-plugin-image`,
-        `gatsby-plugin-sharp`,
-        `gatsby-transformer-sharp`,
+        {
+            resolve: `gatsby-plugin-sharp`,
+            options: {
+                defaults: {
+                    formats: [`auto`, `webp`],
+                    placeholder: `dominantColor`,
+                    quality: 70, // 降低质量以减少处理负载
+                    breakpoints: [400, 750, 1080], // 减少断点数量
+                },
+                // 添加性能优化选项
+                failOnError: false,
+                stripMetadata: true,
+            },
+        },
+        {
+            resolve: `gatsby-transformer-sharp`,
+            options: {
+                // 限制并行处理数量
+                checkSupportedExtensions: false,
+            },
+        },
         `gatsby-plugin-postcss`,
         ...fileSystemConfigs,
         {
@@ -73,6 +98,10 @@ module.exports = {
                         resolve: `gatsby-remark-images`,
                         options: {
                             maxWidth: 630,
+                            quality: 70,
+                            withWebp: true,
+                            linkImagesToOriginal: false, // 减少链接
+                            showCaptions: false, // 禁用标题以节省资源
                         },
                     },
                     `gatsby-remark-copy-linked-files`,

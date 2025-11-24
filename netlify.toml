@@ -1,0 +1,19 @@
+[build]
+command = "npm run build"
+publish = "public"
+
+[build.environment]
+NODE_VERSION = "18"
+NODE_OPTIONS = "--max-old-space-size=4096"
+GATSBY_CPU_COUNT = "2"
+
+[build.processing]
+skip_processing = true
+
+[[plugins]]
+package = "@netlify/plugin-gatsby"
+
+# 优化缓存
+[build.caching]
+# 启用构建镜像缓存
+enabled = true

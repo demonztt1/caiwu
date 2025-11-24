@@ -66,13 +66,13 @@
     "url": "git+https://github.com/gatsbyjs/gatsby-starter-blog.git"
   },
   "scripts": {
-    "build": "NODE_OPTIONS='--max-old-space-size=4096' gatsby clean && gatsby build && gh-pages -d public",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' gatsby clean && gatsby build",
+    "deploy": "NODE_OPTIONS='--max-old-space-size=4096' gatsby clean && gatsby build && gh-pages -d public",
     "develop": "gatsby develop",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "start": "gatsby develop",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
     "test": "echo \"Write tests! -> https://gatsby.dev/unit-testing\" && exit 1",
-    "deploy": "gatsby clean && gatsby build && gh-pages -d public"
   }
 }
