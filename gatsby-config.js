@@ -8,8 +8,10 @@ const fileSystemConfigs = [
         options: {
             name: `images`,
             path: `${__dirname}/src/images`,
+            ignore: ["**/.DS_Store", "**/.*"] // 减少文件监听器
         },
     }
+
 ]
 
 // 为所有支持的语言添加文件系统配置
@@ -19,6 +21,8 @@ languageCodes.forEach(lang => {
         options: {
             name: `pages-${lang}`,
             path: `${__dirname}/content/${lang}/pages`,
+            ignore: ["**/.DS_Store", "**/.*"],
+
         },
     })
     fileSystemConfigs.push({
@@ -26,6 +30,7 @@ languageCodes.forEach(lang => {
         options: {
             name: `blog-${lang}`,
             path: `${__dirname}/content/${lang}/blog`,
+            ignore: ["**/.DS_Store", "**/.*"],
         },
     })
     fileSystemConfigs.push({
@@ -33,6 +38,7 @@ languageCodes.forEach(lang => {
         options: {
             name: `products-${lang}`,
             path: `${__dirname}/content/${lang}/products`,
+            ignore: ["**/.DS_Store", "**/.*"],
         },
     })
     fileSystemConfigs.push({
@@ -40,6 +46,7 @@ languageCodes.forEach(lang => {
         options: {
             name: `services-${lang}`,
             path: `${__dirname}/content/${lang}/services`,
+            ignore: ["**/.DS_Store", "**/.*"],
         },
     })
 })

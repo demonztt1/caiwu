@@ -15,8 +15,6 @@ exports.onPreInit = () => {
         console.log('堆栈跟踪:', warning.stack);
     });
 };
-// 在文件最顶部增加事件监听器限制
-require('events').EventEmitter.defaultMaxListeners = 100;
 
 // 优化 Webpack 配置
 exports.onCreateWebpackConfig = ({ stage, actions }) => {
