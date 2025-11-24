@@ -1,10 +1,9 @@
 // src/components/simple-payment-flow.js
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useWallet } from '../contexts/wallet-context';
 import { createTransferTransaction, checkTokenBalance } from '../utils/solana-payment';
 import { trackPaymentStart, trackPaymentComplete, trackButtonClick } from '../hooks/use-google-analytics'
 
-// 修改组件以支持 product 和 service 两种类型
 const SimplePaymentFlow = ({ product, service, onPaymentSuccess }) => {
     // 统一处理商品或服务
     const item = product || service;
@@ -18,6 +17,22 @@ const SimplePaymentFlow = ({ product, service, onPaymentSuccess }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [tokenBalance, setTokenBalance] = useState(0);
+
+    // 使用 AbortController 来取消未完成的请求
+    const abortControllerRef = useRef(new AbortController());
+    const timeoutRef = useRef(null);
+
+    // 组件卸载时清理
+    useEffect(() => {
+        return () => {
+            // 取消所有进行中的请求
+            abortControllerRef.current.abort();
+            // 清除所有超时
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+        };
+    }, []);
 
     // 使用 useCallback 包装检查余额函数
     const checkTokenBalanceCustom = useCallback(async () => {
@@ -38,6 +53,13 @@ const SimplePaymentFlow = ({ product, service, onPaymentSuccess }) => {
         }
     }, [checkTokenBalanceCustom, orderData]);
 
+    // 创建新的 AbortController
+    const createNewAbortController = useCallback(() => {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = new AbortController();
+        return abortControllerRef.current;
+    }, []);
+
     // 1. 创建订单
     const createOrder = async () => {
         trackPaymentStart(item.title)
@@ -51,6 +73,8 @@ const SimplePaymentFlow = ({ product, service, onPaymentSuccess }) => {
         setLoading(true);
         setError('');
 
+        const controller = createNewAbortController();
+
         try {
             const response = await fetch('http://localhost:3000/api/orders/create', {
                 method: 'POST',
@@ -58,11 +82,16 @@ const SimplePaymentFlow = ({ product, service, onPaymentSuccess }) => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    productId: item.id || `service_${item.title}`, // 为服务生成ID
+                    productId: item.id || `service_${item.title}`,
                     userAddress: publicKey,
-                    type: itemType // 添加类型标识
-                })
+                    type: itemType
+                }),
+                signal: controller.signal
             });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
 
             const result = await response.json();
 
@@ -73,6 +102,11 @@ const SimplePaymentFlow = ({ product, service, onPaymentSuccess }) => {
                 setError(result.error || '创建订单失败');
             }
         } catch (err) {
+            if (err.name === 'AbortError') {
+                console.log('创建订单请求被取消');
+                return;
+            }
+            console.error('创建订单错误:', err);
             setError('网络错误，请稍后重试');
         } finally {
             setLoading(false);
@@ -85,6 +119,9 @@ const SimplePaymentFlow = ({ product, service, onPaymentSuccess }) => {
         setError('');
         trackPaymentStart(item.title)
         trackButtonClick('payment_start')
+
+        const controller = createNewAbortController();
+
         try {
             // 检查余额是否足够
             if (tokenBalance < orderData.order.amount) {
@@ -120,8 +157,10 @@ const SimplePaymentFlow = ({ product, service, onPaymentSuccess }) => {
 
             console.log('支付交易已发送，等待确认:', signature);
 
-            // 等待一段时间让交易被确认
-            await new Promise(resolve => setTimeout(resolve, 3000));
+            // 使用 Promise 和 setTimeout 替代直接 setTimeout
+            await new Promise((resolve) => {
+                timeoutRef.current = setTimeout(resolve, 3000);
+            });
 
             // 验证支付 - 添加重试机制
             let verifyResult;
@@ -129,32 +168,47 @@ const SimplePaymentFlow = ({ product, service, onPaymentSuccess }) => {
             const maxRetries = 10;
 
             while (retries < maxRetries) {
-                const verifyResponse = await fetch('http://localhost:3000/api/payments/verify', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        orderId: orderData.order.orderId,
-                        transactionSignature: signature,
-                        userAddress: publicKey,
-                        type: itemType
-                    })
-                });
+                try {
+                    const verifyResponse = await fetch('http://localhost:3000/api/payments/verify', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            orderId: orderData.order.orderId,
+                            transactionSignature: signature,
+                            userAddress: publicKey,
+                            type: itemType
+                        }),
+                        signal: controller.signal
+                    });
 
-                verifyResult = await verifyResponse.json();
+                    if (!verifyResponse.ok) {
+                        throw new Error(`HTTP error! status: ${verifyResponse.status}`);
+                    }
 
-                if (verifyResult.success) {
-                    break;
+                    verifyResult = await verifyResponse.json();
+
+                    if (verifyResult.success) {
+                        break;
+                    }
+
+                    if (verifyResult.error && verifyResult.error.includes('未确认')) {
+                        retries++;
+                        await new Promise(resolve => {
+                            timeoutRef.current = setTimeout(resolve, 2000);
+                        });
+                        continue;
+                    }
+
+                    throw new Error(verifyResult.error);
+                } catch (fetchError) {
+                    if (fetchError.name === 'AbortError') {
+                        console.log('验证请求被取消');
+                        return;
+                    }
+                    throw fetchError;
                 }
-
-                if (verifyResult.error && verifyResult.error.includes('未确认')) {
-                    retries++;
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    continue;
-                }
-
-                throw new Error(verifyResult.error);
             }
 
             if (!verifyResult.success) {
@@ -168,7 +222,6 @@ const SimplePaymentFlow = ({ product, service, onPaymentSuccess }) => {
             if (itemType === 'product') {
                 await grantProductAccess(verifyResult.data.orderId, verifyResult.data.accessToken);
             } else {
-                // 服务支付成功处理
                 await grantServiceAccess(verifyResult.data.orderId, verifyResult.data.accessToken);
             }
 
@@ -178,6 +231,10 @@ const SimplePaymentFlow = ({ product, service, onPaymentSuccess }) => {
             }
 
         } catch (err) {
+            if (err.name === 'AbortError') {
+                console.log('支付流程被取消');
+                return;
+            }
             console.error('支付失败:', err);
             setError('支付失败: ' + (err.message || '未知错误'));
         } finally {
@@ -189,6 +246,8 @@ const SimplePaymentFlow = ({ product, service, onPaymentSuccess }) => {
     const grantProductAccess = async (orderId, accessToken) => {
         trackPaymentComplete(item.title)
 
+        const controller = createNewAbortController();
+
         try {
             const response = await fetch('http://localhost:3000/api/products/access', {
                 method: 'POST',
@@ -198,8 +257,13 @@ const SimplePaymentFlow = ({ product, service, onPaymentSuccess }) => {
                 body: JSON.stringify({
                     orderId,
                     accessToken
-                })
+                }),
+                signal: controller.signal
             });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
 
             const result = await response.json();
 
@@ -210,13 +274,17 @@ const SimplePaymentFlow = ({ product, service, onPaymentSuccess }) => {
                 console.error('获取商品访问权限失败:', result.error);
             }
         } catch (err) {
-            console.error('获取商品访问权限失败:', err);
+            if (err.name !== 'AbortError') {
+                console.error('获取商品访问权限失败:', err);
+            }
         }
     };
 
     // 4. 获取服务访问权限
     const grantServiceAccess = async (orderId, accessToken) => {
         trackPaymentComplete(item.title)
+
+        const controller = createNewAbortController();
 
         try {
             const response = await fetch('http://localhost:3000/api/services/access', {
@@ -227,8 +295,13 @@ const SimplePaymentFlow = ({ product, service, onPaymentSuccess }) => {
                 body: JSON.stringify({
                     orderId,
                     accessToken
-                })
+                }),
+                signal: controller.signal
             });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
 
             const result = await response.json();
 
@@ -241,28 +314,29 @@ const SimplePaymentFlow = ({ product, service, onPaymentSuccess }) => {
                 setCurrentStep(4);
             } else {
                 console.error('获取服务访问权限失败:', result.error);
-                // 即使获取服务信息失败，也标记为完成
                 setCurrentStep(4);
             }
         } catch (err) {
-            console.error('获取服务访问权限失败:', err);
-            // 即使获取服务信息失败，也标记为完成
+            if (err.name !== 'AbortError') {
+                console.error('获取服务访问权限失败:', err);
+            }
             setCurrentStep(4);
         }
     };
 
     // 重置流程
-    const resetFlow = () => {
+    const resetFlow = useCallback(() => {
+        createNewAbortController();
         setCurrentStep(1);
         setOrderData(null);
         setPaymentData(null);
         setError('');
-    };
+    }, [createNewAbortController]);
 
     // 格式化时间
-    const formatTime = (timestamp) => {
+    const formatTime = useCallback((timestamp) => {
         return new Date(timestamp).toLocaleString();
-    };
+    }, []);
 
     return (
         <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-6">
@@ -340,7 +414,7 @@ const SimplePaymentFlow = ({ product, service, onPaymentSuccess }) => {
                         <button
                             onClick={createOrder}
                             disabled={loading || !connected}
-                            className="btn-primary w-full disabled:opacity-50"
+                            className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? '创建中...' : '创建订单'}
                         </button>
@@ -366,7 +440,7 @@ const SimplePaymentFlow = ({ product, service, onPaymentSuccess }) => {
                         <button
                             onClick={executePayment}
                             disabled={loading}
-                            className="btn-primary w-full"
+                            className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? '支付中...' : `支付 ${orderData.order.amount} ${orderData.order.currency}`}
                         </button>

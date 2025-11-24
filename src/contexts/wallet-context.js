@@ -1,5 +1,5 @@
 // src/contexts/wallet-context.js
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 
 const WalletContext = createContext();
 
@@ -15,9 +15,11 @@ export const WalletProvider = ({ children }) => {
     const [publicKey, setPublicKey] = useState(null);
     const [connected, setConnected] = useState(false);
     const [loading, setLoading] = useState(false);
+    const listenersAdded = useRef(false);
 
     // 检查 Phantom 钱包是否安装
     const isPhantomInstalled = useCallback(() => {
+        if (typeof window === 'undefined') return false;
         return window.solana && window.solana.isPhantom;
     }, []);
 
@@ -98,34 +100,57 @@ export const WalletProvider = ({ children }) => {
         }
     };
 
-    // 监听钱包连接状态变化
+    // 监听钱包连接状态变化 - 优化版本
     useEffect(() => {
         const provider = getProvider();
-        if (provider) {
+        if (provider && !listenersAdded.current) {
+            console.log('Setting up wallet listeners');
+
             const handleConnect = () => {
-                setPublicKey(provider.publicKey.toString());
+                console.log('Wallet connected');
+                setPublicKey(provider.publicKey?.toString());
                 setConnected(true);
             };
 
             const handleDisconnect = () => {
+                console.log('Wallet disconnected');
                 setPublicKey(null);
                 setConnected(false);
             };
 
+            const handleAccountChanged = (publicKey) => {
+                console.log('Account changed:', publicKey);
+                if (publicKey) {
+                    setPublicKey(publicKey.toString());
+                    setConnected(true);
+                } else {
+                    setPublicKey(null);
+                    setConnected(false);
+                }
+            };
+
+            // 添加监听器
             provider.on('connect', handleConnect);
             provider.on('disconnect', handleDisconnect);
+            provider.on('accountChanged', handleAccountChanged);
+
+            listenersAdded.current = true;
 
             // 检查是否已连接
-            if (provider.isConnected) {
+            if (provider.isConnected && provider.publicKey) {
                 setPublicKey(provider.publicKey.toString());
                 setConnected(true);
             }
 
+            // 清理函数
             return () => {
+                console.log('Cleaning up wallet listeners');
                 if (provider.removeListener) {
                     provider.removeListener('connect', handleConnect);
                     provider.removeListener('disconnect', handleDisconnect);
+                    provider.removeListener('accountChanged', handleAccountChanged);
                 }
+                listenersAdded.current = false;
             };
         }
     }, [getProvider]);

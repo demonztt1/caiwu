@@ -2,52 +2,45 @@
 const path = require(`path`)
 const { createFilePath } = require(`gatsby-source-filesystem`)
 const { languageCodes, defaultLanguage } = require('./src/config/languages')
+const EventEmitter = require('events');
 
+exports.onPreInit = () => {
+    // 增加全局限制避免警告
+    EventEmitter.defaultMaxListeners = 50;
+
+    // 监听进程的警告事件来捕获问题
+    process.on('warning', (warning) => {
+        console.log('警告名称:', warning.name);
+        console.log('警告信息:', warning.message);
+        console.log('堆栈跟踪:', warning.stack);
+    });
+};
 // 在文件最顶部增加事件监听器限制
 require('events').EventEmitter.defaultMaxListeners = 100;
 
 // 优化 Webpack 配置
-exports.onCreateWebpackConfig = ({ actions, stage }) => {
-    actions.setWebpackConfig({
-        resolve: {
-            fallback: {
-                "crypto": require.resolve("crypto-browserify"),
-                "stream": require.resolve("stream-browserify"),
-                "assert": require.resolve("assert/"),
-                "buffer": require.resolve("buffer/"),
-                "process": require.resolve("process/browser")
-            }
-        },
-        plugins: stage === 'build-javascript' ? [
-            new (require('webpack').ProvidePlugin)({
-                Buffer: ['buffer', 'Buffer'],
-            })
-        ] : []
-    })
-
-    // 在生产构建时优化性能
-    if (stage === 'build-javascript') {
+exports.onCreateWebpackConfig = ({ stage, actions }) => {
+    if (stage === 'develop') {
         actions.setWebpackConfig({
-            optimization: {
-                splitChunks: {
-                    chunks: 'all',
-                    cacheGroups: {
-                        default: false,
-                        vendors: false,
-                        // 合并所有第三方代码
-                        commons: {
-                            name: 'commons',
-                            chunks: 'all',
-                            minChunks: 2,
-                            reuseExistingChunk: true
-                        }
-                    }
+            resolve: {
+                fallback: {
+                    events: require.resolve('events/')
                 }
             }
         })
     }
 }
+// 可选：创建页面时的额外配置
+exports.onCreatePage = ({ page, actions }) => {
+    const { createPage } = actions
 
+    // 确保页面有默认的上下文
+    if (!page.context) {
+        page.context = {}
+    }
+
+    createPage(page)
+}
 exports.onCreateNode = ({ node, actions, getNode }) => {
     const { createNodeField } = actions
 
