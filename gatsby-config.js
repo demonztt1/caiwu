@@ -58,6 +58,7 @@ module.exports = {
         FAST_DEV: false,
         DEV_SSR: false
     },
+    adapter: require('gatsby-adapter-netlify').default,
     siteMetadata: {
         title: "元都-逆熵",
         titleTemplate: "%s · 量化万物，共建生态",

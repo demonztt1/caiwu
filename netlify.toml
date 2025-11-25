@@ -1,21 +1,26 @@
-# example netlify.toml
 [build]
-  command = "npm run build"
-  functions = "netlify/functions"
-  publish = "public"
+command = "npm run build"
+publish = "public"
 
-  ## Uncomment to use this redirect for Single Page Applications like create-react-app.
-  ## Not needed for static site generators.
-  #[[redirects]]
-  #  from = "/*"
-  #  to = "/index.html"
-  #  status = 200
+[build.environment]
+NODE_VERSION = "18"
+# 可选：抑制弃用警告
+NODE_OPTIONS = "--no-warnings"
 
-  ## (optional) Settings for Netlify Dev
-  ## https://github.com/netlify/cli/blob/main/docs/netlify-dev.md#project-detection
-  #[dev]
-  #  command = "yarn start" # Command to start your dev server
-  #  port = 3000 # Port that the dev server will be listening on
-  #  publish = "dist" # Folder with the static content for _redirect file
+# 函数配置（如果需要）
+[functions]
+directory = "netlify/functions"
 
-  ## more info on configuring this file: https://ntl.fyi/file-based-build-config
+# 重定向配置
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
+
+# 头部安全配置
+[[headers]]
+for = "/*"
+[headers.values]
+X-Frame-Options = "DENY"
+X-XSS-Protection = "1; mode=block"
+X-Content-Type-Options = "nosniff"
