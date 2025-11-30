@@ -97,19 +97,19 @@ const MultiLanguageContact = ({ currentLanguage }) => {
 
     const getServiceOptions = () => [
         {
-            id: 'tax',
-            name: t('services.tax', '税务筹划'),
-            description: t('services.taxDesc', '国际税务优化方案')
+            id: 'quantitative',
+            name: t('services.quantitative', '量化分析'),
+            description: t('services.quantitativeDesc', '高级量化分析解决方案')
         },
         {
-            id: 'compliance',
-            name: t('services.compliance', '财税合规'),
-            description: t('services.complianceDesc', '确保企业合规运营')
+            id: 'decision',
+            name: t('services.decision', '决策分析'),
+            description: t('services.decisionDesc', '数据驱动的决策支持系统')
         },
         {
-            id: 'business',
-            name: t('services.business', '商务咨询'),
-            description: t('services.businessDesc', '全面的商务支持服务')
+            id: 'strategy',
+            name: t('services.strategy', '策略优化'),
+            description: t('services.strategyDesc', '量化策略优化与验证')
         },
         {
             id: 'ai',

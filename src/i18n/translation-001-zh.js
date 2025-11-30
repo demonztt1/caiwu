@@ -15,6 +15,18 @@ export const ZH = {
     "contact": "联系我们",
     "freeConsultation": "免费咨询"
   },
+  "contact": {
+    "selectService": "选择咨询服务",
+    "contactChannels": "联系渠道",
+    "workingHours": "工作时间",
+    "timezone": "时区",
+    "supportLanguages": "支持语言",
+    "wechat": "微信",
+    "phone": "电话",
+    "close": "关闭",
+    "wechatConsult": "微信咨询",
+    "scanQRCode": "扫描二维码添加客服微信"
+  },
   "footer": {
     "companyName": "元都-逆熵",
     "companyDescription": "专业的量化分析与咨询服务，为企业提供全方位的量化解决方案和数据分析服务。",
@@ -46,6 +58,8 @@ export const ZH = {
     "businessDesc": "全面的商务支持服务",
     "ai": "AI内容服务",
     "aiDesc": "多语言内容生成",
+    "decision": "决策分析",
+    "decisionDesc": "数据驱动的决策支持系统",
     "serviceList": [
       {
         "title": "个人成长量化分析",
@@ -200,7 +214,17 @@ export const ZH = {
           "seoDesc": "搜索引擎优化内容"
         },
         "cta": "了解AI内容服务"
-      }
+      },
+      "tagFilter": "标签",
+      "clearFilter": "清除筛选",
+      "filteredByTag": "正在查看标签",
+      "noPostsWithTag": "没有找到包含该标签的文章",
+      "viewAllPosts": "查看所有文章",
+      "categories": "博客主题目录",
+      "articlesCount": "篇文章",
+      "browseCategory": "浏览主题",
+      "noPosts": "暂无博客文章",
+      "preparingContent": "该语言版本的博客内容正在准备中..."
     },
     "products": {
       "title": "我们的产品",

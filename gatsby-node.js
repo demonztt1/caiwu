@@ -215,7 +215,10 @@ exports.createPages = async ({ graphql, actions, reporter }) => {
                 createPage({
                     path: `${prefix}/blog`,
                     component: templates.blogList,
-                    context: { language: lang, fallback: false },
+                    context: {
+                        language: lang,
+                        fallback: false
+                    },
                 })
 
                 // Contact Page: /contact 或 /en/contact (如果Markdown没覆盖到)

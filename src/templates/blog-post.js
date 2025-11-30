@@ -3,6 +3,7 @@ import { Link, graphql } from "gatsby"
 import Layout from "../components/layout"
 import Seo from "../components/seo"
 import { getThemeFromTags } from "../utils/tag-mapper"
+import { defaultLanguage } from "../config/languages"
 
 const BlogPostTemplate = ({
                               data: { previous, next, site, markdownRemark: post },
@@ -10,8 +11,13 @@ const BlogPostTemplate = ({
                           }) => {
     const siteTitle = site.siteMetadata?.title || `Title`
 
+    // 生成带语言参数的标签链接
+    const getTagLink = (tag) => {
+        const basePath = post.fields.language === defaultLanguage ? '/blog' : `/${post.fields.language}/blog`
+        return `${basePath}?tag=${encodeURIComponent(tag)}`
+    }
+
     // 生成文章目录
-    // 替换现有的 TableOfContents 组件
     const TableOfContents = ({ html }) => {
         const [headings, setHeadings] = React.useState([])
 
@@ -125,7 +131,7 @@ const BlogPostTemplate = ({
                                         {post.frontmatter.tags.map(tag => (
                                             <Link
                                                 key={tag}
-                                                to={`/blog?tag=${tag}`}
+                                                to={getTagLink(tag)}
                                                 className="bg-white bg-opacity-80 text-gray-700 hover:bg-white px-3 py-1 rounded-full text-sm font-medium transition-colors shadow-sm"
                                             >
                                                 {tag}
@@ -205,7 +211,7 @@ const BlogPostTemplate = ({
                                         {post.frontmatter.tags.map(tag => (
                                             <Link
                                                 key={tag}
-                                                to={`/blog?tag=${tag}`}
+                                                to={getTagLink(tag)}
                                                 className="bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 hover:from-indigo-100 hover:to-purple-100 hover:text-indigo-700 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-sm hover:shadow-md border border-gray-200"
                                             >
                                                 #{tag}
@@ -269,7 +275,7 @@ const BlogPostTemplate = ({
                                     : 'Explore more in-depth content about quantitative analysis, AI technology and business strategies'}
                             </p>
                             <Link
-                                to="/blog"
+                                to={post.fields.language === defaultLanguage ? '/blog' : `/${post.fields.language}/blog`}
                                 className="inline-flex items-center bg-white text-indigo-600 hover:bg-gray-50 px-6 py-3 rounded-lg font-semibold transition-colors shadow-sm"
                             >
                                 {post.fields.language === 'zh' ? '浏览所有文章' : 'Browse All Articles'}

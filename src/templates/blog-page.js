@@ -4,39 +4,15 @@ import Layout from "../components/layout"
 import Seo from "../components/seo"
 import { useTranslation } from "../hooks/use-translation"
 import { defaultLanguage, getLanguageSelectorLanguages } from "../config/languages"
-// 在 blog-page.js 中更新导入
 import { getThemeFromTags, getThemeConfig } from "../utils/tag-mapper"
 
-// 在 categorizePostsByTheme 函数中更新：
-const categorizePostsByTheme = (posts) => {
-    const themes = {};
-
-    // 使用 THEME_CONFIG 初始化主题
-    Object.keys(THEME_CONFIG).forEach(themeKey => {
-        const config = getThemeConfig(themeKey);
-        themes[themeKey] = {
-            name: t(config.nameKey),
-            description: t(config.descriptionKey),
-            posts: [],
-            icon: config.icon,
-            color: config.color
-        };
-    });
-
-    posts.forEach(post => {
-        const themeKey = getThemeFromTags(post.frontmatter.tags, pageContext.language)
-        if (themes[themeKey]) {
-            themes[themeKey].posts.push(post)
-        } else {
-            themes['content-ecosystem'].posts.push(post)
-        }
-    })
-
-    return themes
-}
-const BlogPage = ({ data, pageContext }) => {
+const BlogPage = ({ data, pageContext, location }) => {
     const posts = data.allMarkdownRemark.nodes
     const { t } = useTranslation()
+
+    // 获取 URL 参数中的标签
+    const searchParams = typeof window !== 'undefined' ? new URLSearchParams(location.search) : new URLSearchParams()
+    const selectedTag = searchParams.get('tag')
 
     // 获取本地化路径
     const getLocalizedPath = (path, contentLanguage) => {
@@ -56,7 +32,18 @@ const BlogPage = ({ data, pageContext }) => {
         }
     }
 
-    // 按主题分类文章 - 使用现有翻译变量
+    // 生成带标签筛选的路径
+    const getTagFilterPath = (tag) => {
+        const basePath = pageContext.language === defaultLanguage ? '/blog' : `/${pageContext.language}/blog`
+        return tag ? `${basePath}?tag=${encodeURIComponent(tag)}` : basePath
+    }
+
+    // 清除筛选
+    const clearFilter = () => {
+        return getTagFilterPath(null)
+    }
+
+    // 按主题分类文章
     const categorizePostsByTheme = (posts) => {
         const themes = {
             'personal-growth': {
@@ -103,7 +90,15 @@ const BlogPage = ({ data, pageContext }) => {
             }
         }
 
-        posts.forEach(post => {
+        // 筛选包含选中标签的文章
+        const filteredPosts = selectedTag
+            ? posts.filter(post =>
+                post.frontmatter.tags &&
+                post.frontmatter.tags.includes(selectedTag)
+            )
+            : posts
+
+        filteredPosts.forEach(post => {
             const themeKey = getThemeFromTags(post.frontmatter.tags, pageContext.language)
             if (themes[themeKey]) {
                 themes[themeKey].posts.push(post)
@@ -117,6 +112,17 @@ const BlogPage = ({ data, pageContext }) => {
 
     const themes = categorizePostsByTheme(posts)
     const availableLanguages = getLanguageSelectorLanguages()
+
+    // 获取所有唯一的标签
+    const allTags = [...new Set(posts.flatMap(post => post.frontmatter.tags || []))].sort()
+
+    // 计算筛选后的文章总数
+    const filteredPostsCount = selectedTag
+        ? posts.filter(post =>
+            post.frontmatter.tags &&
+            post.frontmatter.tags.includes(selectedTag)
+        ).length
+        : posts.length
 
     // 如果有回退情况（没有对应语言的内容），显示默认内容
     if (pageContext.fallback && posts.length === 0) {
@@ -150,7 +156,7 @@ const BlogPage = ({ data, pageContext }) => {
     return (
         <Layout>
             <Seo
-                title={t('pages.blog.title')}
+                title={selectedTag ? `${selectedTag} - ${t('pages.blog.title')}` : t('pages.blog.title')}
                 description={t('pages.blog.description', {
                     defaultValue: "探索最新的量化分析见解、技术文章和行业动态"
                 })}
@@ -158,9 +164,59 @@ const BlogPage = ({ data, pageContext }) => {
 
             <section className="py-16">
                 <div className="main-container">
-                    <h1 className="text-3xl font-bold text-gray-800 mb-8">
-                        {t('pages.blog.heading')}
-                    </h1>
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
+                        <h1 className="text-3xl font-bold text-gray-800 mb-4 lg:mb-0">
+                            {selectedTag
+                                ? `${t('pages.blog.tagFilter', { defaultValue: "标签" })}: ${selectedTag}`
+                                : t('pages.blog.heading')
+                            }
+                        </h1>
+
+                        {/* 标签筛选器 */}
+                        <div className="flex flex-wrap items-center gap-3">
+                            {selectedTag && (
+                                <Link
+                                    to={clearFilter()}
+                                    className="inline-flex items-center bg-red-100 text-red-700 hover:bg-red-200 px-4 py-2 rounded-full text-sm font-medium transition-colors"
+                                >
+                                    ✕ {t('pages.blog.clearFilter', { defaultValue: "清除筛选" })}
+                                </Link>
+                            )}
+                            <div className="flex flex-wrap gap-2">
+                                {allTags.slice(0, 10).map(tag => (
+                                    <Link
+                                        key={tag}
+                                        to={getTagFilterPath(tag)}
+                                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                                            selectedTag === tag
+                                                ? 'bg-indigo-600 text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        {tag}
+                                        {selectedTag === tag && (
+                                            <span className="ml-1">✓</span>
+                                        )}
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 筛选状态提示 */}
+                    {selectedTag && (
+                        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p className="text-blue-700 flex items-center">
+                                <span className="mr-2">🔍</span>
+                                {t('pages.blog.filteredByTag', {
+                                    defaultValue: "正在查看标签"
+                                })} "<strong>{selectedTag}</strong>"
+                                - {filteredPostsCount} {t('pages.blog.articlesCount', {
+                                defaultValue: "篇文章"
+                            })}
+                            </p>
+                        </div>
+                    )}
 
                     {/* 博客目录 */}
                     <div className="mb-12 bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 shadow-sm border border-gray-100">
@@ -247,12 +303,15 @@ const BlogPage = ({ data, pageContext }) => {
                                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4 border-t border-gray-100">
                                                 <div className="flex flex-wrap gap-2">
                                                     {post.frontmatter.tags && post.frontmatter.tags.map(tag => (
-                                                        <span
+                                                        <Link
                                                             key={tag}
-                                                            className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-medium hover:bg-gray-200 transition-colors"
+                                                            to={getTagFilterPath(tag)}
+                                                            className={`bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-medium hover:bg-gray-200 transition-colors ${
+                                                                selectedTag === tag ? 'bg-indigo-100 text-indigo-700' : ''
+                                                            }`}
                                                         >
                                                             {tag}
-                                                        </span>
+                                                        </Link>
                                                     ))}
                                                 </div>
                                                 <Link
@@ -279,6 +338,26 @@ const BlogPage = ({ data, pageContext }) => {
                                     defaultValue: "暂无博客文章"
                                 })}
                             </p>
+                        </div>
+                    )}
+
+                    {/* 如果筛选后没有文章 */}
+                    {selectedTag && filteredPostsCount === 0 && (
+                        <div className="text-center py-16 bg-yellow-50 rounded-2xl">
+                            <div className="text-6xl mb-4">🔍</div>
+                            <p className="text-gray-600 text-lg mb-4">
+                                {t('pages.blog.noPostsWithTag', {
+                                    defaultValue: "没有找到包含该标签的文章"
+                                })}
+                            </p>
+                            <Link
+                                to={clearFilter()}
+                                className="inline-flex items-center bg-indigo-600 text-white hover:bg-indigo-700 px-6 py-3 rounded-lg font-semibold transition-colors"
+                            >
+                                {t('pages.blog.viewAllPosts', {
+                                    defaultValue: "查看所有文章"
+                                })}
+                            </Link>
                         </div>
                     )}
 

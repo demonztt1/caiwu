@@ -15,6 +15,18 @@ export const EN = {
     "contact": "Contact",
     "freeConsultation": "Free Consultation"
   },
+  "contact": {
+    "selectService": "Select Consultation Service",
+    "contactChannels": "Contact Channels",
+    "workingHours": "Working Hours",
+    "timezone": "Timezone",
+    "supportLanguages": "Support Languages",
+    "wechat": "WeChat",
+    "phone": "Phone",
+    "close": "Close",
+    "wechatConsult": "WeChat Consultation",
+    "scanQRCode": "Scan QR code to add customer service"
+  },
   "footer": {
     "companyName": "Yuandu-Nisentropy",
     "companyDescription": "Professional quantitative analysis and consulting, providing comprehensive quantitative solutions and data analysis services for enterprises.",
@@ -46,6 +58,8 @@ export const EN = {
     "businessDesc": "Comprehensive business support services",
     "ai": "AI Content Services",
     "aiDesc": "Multilingual content generation",
+    "decision": "Decision Analysis",
+    "decisionDesc": "Data-driven decision support systems",
     "serviceList": [
       {
         "title": "Personal Growth Analytics",
@@ -200,7 +214,17 @@ export const EN = {
           "seoDesc": "Search engine optimized content"
         },
         "cta": "Learn About AI Content Services"
-      }
+      },
+      "tagFilter": "Tag",
+      "clearFilter": "Clear filter",
+      "filteredByTag": "Viewing tag",
+      "noPostsWithTag": "No articles found with this tag",
+      "viewAllPosts": "View all posts",
+      "categories": "Blog Categories",
+      "articlesCount": "articles",
+      "browseCategory": "Browse Category",
+      "noPosts": "No blog posts available",
+      "preparingContent": "Blog content for this language is being prepared..."
     },
     "products": {
       "title": "Our Products",
