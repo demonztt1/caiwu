@@ -1,4 +1,8 @@
 // src/config/languages.js
+// 在 languages.js 末尾添加
+// 检查实际有内容的语言（根据你的文件结构）
+
+
 export const languages = {
     zh: {
         id: 1,
@@ -1001,7 +1005,45 @@ export const languages = {
         isActive: false
     }
 }
+// src/config/languages.js
 
+// ... 保持你现有的 languages 对象不变 ...
+
+// 获取用于语言选择器的语言列表
+export const getLanguageSelectorLanguages = () => {
+    return Object.entries(languages)
+        .filter(([code, lang]) => lang.isActive)
+        .map(([code, lang]) => ({
+            code: lang.code,
+            flag: lang.flag,
+            nativeName: lang.nativeName,
+            name: lang.name
+        }));
+};
+
+// 获取激活的语言列表（简化版）
+export const getActiveLanguages = () => {
+    return Object.values(languages).filter(lang => lang.isActive);
+};
+
+// 获取用于sitemap的语言（限制数量以提高收录效果）
+export const getSitemapLanguages = () => {
+    // 建议先专注于主要语言，逐步扩展
+    const primaryLanguages = ['zh', 'en', 'es', 'fr', 'de', 'ja', 'ko'];
+    return primaryLanguages.filter(lang => {
+        const language = languages[lang];
+        return language && language.isActive;
+    });
+};
+
+// 检查实际有内容的语言
+export const getActiveLanguagesWithContent = () => {
+    // 这里应该根据你的实际内容文件来检测
+    // 暂时返回所有激活的语言，但你需要根据实际情况调整
+    return Object.keys(languages).filter(code => languages[code].isActive);
+};
+
+export default languages;
 // 获取所有激活的语言
 export const activeLanguages = Object.fromEntries(
     Object.entries(languages).filter(([_, lang]) => lang.isActive)

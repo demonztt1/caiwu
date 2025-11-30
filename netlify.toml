@@ -1,12 +1,12 @@
 [build]
-command = "npm run build"
 publish = "public"
+command = "echo 'Static site - no build required'"
 
-[build.environment]
-NODE_VERSION = "18"
-# 可选：抑制弃用警告
-NODE_OPTIONS = "--no-warnings"
-
+#[build.environment]
+#NODE_VERSION = "18"
+## 可选：抑制弃用警告
+#NODE_OPTIONS = "--no-warnings"
+#
 # 函数配置（如果需要）
 [functions]
 directory = "netlify/functions"

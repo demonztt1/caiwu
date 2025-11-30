@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netlify 下级目录配置演示</title>
+    <style>
+        :root {
+            --primary-color: #00ad9f;
+            --secondary-color: #2c3e50;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            border-radius: 0 0 10px 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 0.5rem;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 1rem;
+        }
+
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tab.active {
+            border-bottom: 3px solid var(--primary-color);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .example-list {
+            list-style-type: none;
+            margin-left: 1rem;
+        }
+
+        .example-list li {
+            margin-bottom: 0.5rem;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .example-list li:before {
+            content: "•";
+            color: var(--primary-color);
+            position: absolute;
+            left: 0;
+            font-size: 1.2rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1rem;
+            color: #6c757d;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 1rem;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #008e82;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .nav-tab {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="container">
+        <h1>Netlify 下级目录配置指南</h1>
+        <p class="subtitle">学习如何在 Netlify 上部署静态文件并配置下级目录访问</p>
+    </div>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h2>Netlify 下级目录配置方法</h2>
+        <p>在 Netlify 上部署静态网站时，您可能需要配置下级目录的访问规则。以下是几种常见的方法：</p>
+
+        <div class="nav-tabs">
+            <div class="nav-tab active" data-tab="redirects">_redirects 文件</div>
+            <div class="nav-tab" data-tab="toml">netlify.toml 配置</div>
+            <div class="nav-tab" data-tab="spa">单页应用配置</div>
+        </div>
+
+        <div class="tab-content active" id="redirects">
+            <h3>使用 _redirects 文件</h3>
+            <p>在项目根目录创建 <code>_redirects</code> 文件（无扩展名），添加重定向规则：</p>
+
+            <div class="code-block">
+                # 基本重定向
+                /blog/* /blog/:splat 200
+
+                # 强制 HTTPS
+                http://example.com/* https://example.com/:splat 301!
+
+                # 自定义 404 页面
+                /* /404.html 404
+            </div>
+
+            <p>示例说明：</p>
+            <ul class="example-list">
+                <li><code>/blog/* /blog/:splat 200</code> - 将所有 /blog/ 路径下的请求重定向到对应的 /blog/ 目录</li>
+                <li><code>:splat</code> 通配符匹配任意路径</li>
+                <li>状态码 200 表示重写（不改变 URL）</li>
+                <li>状态码 301 或 302 表示重定向（改变 URL）</li>
+            </ul>
+        </div>
+
+        <div class="tab-content" id="toml">
+            <h3>使用 netlify.toml 配置文件</h3>
+            <p>在项目根目录创建 <code>netlify.toml</code> 文件，配置更复杂的规则：</p>
+
+            <div class="code-block">
+                [build]
+                publish = "dist"
+                command = "npm run build"
+
+                [[redirects]]
+                from = "/products/*"
+                to = "/products/:splat"
+                status = 200
+
+                [[redirects]]
+                from = "/docs/*"
+                to = "/docs/:splat.html"
+                status = 200
+
+                [[redirects]]
+                from = "/*"
+                to = "/index.html"
+                status = 200
+
+                # 处理 SPA 路由
+                [[redirects]]
+                from = "/app/*"
+                to = "/app/index.html"
+                status = 200
+            </div>
+
+            <p>优势：</p>
+            <ul class="example-list">
+                <li>支持更复杂的重定向逻辑</li>
+                <li>可以设置构建命令和发布目录</li>
+                <li>支持条件重定向</li>
+                <li>便于版本控制和团队协作</li>
+            </ul>
+        </div>
+
+        <div class="tab-content" id="spa">
+            <h3>单页应用 (SPA) 配置</h3>
+            <p>对于 React、Vue、Angular 等单页应用，需要将所有路由指向 index.html：</p>
+
+            <div class="code-block">
+                # _redirects 文件方式
+                /* /index.html 200
+
+                # netlify.toml 方式
+                [[redirects]]
+                from = "/*"
+                to = "/index.html"
+                status = 200
+            </div>
+
+            <p>对于有下级目录的 SPA：</p>
+
+            <div class="code-block">
+                # 处理 /admin/* 路径
+                /admin/* /admin/index.html 200
+
+                # 处理其他路径
+                /* /index.html 200
+            </div>
+
+            <p>注意事项：</p>
+            <ul class="example-list">
+                <li>确保所有路由最终都指向对应的 index.html 文件</li>
+                <li>使用状态码 200 进行重写，而不是 301/302 重定向</li>
+                <li>在 SPA 中，客户端路由会处理后续的路径解析</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>实际部署示例</h2>
+        <p>假设您有以下项目结构：</p>
+
+        <div class="code-block">
+            project/
+            ├── index.html
+            ├── about.html
+            ├── blog/
+            │   ├── index.html
+            │   └── post-1.html
+            ├── admin/
+            │   └── index.html  # SPA 管理后台
+            └── _redirects
+        </div>
+
+        <p>对应的 _redirects 文件内容：</p>
+
+        <div class="code-block">
+            # 博客路径
+            /blog/* /blog/:splat 200
+
+            # 管理后台 SPA
+            /admin/* /admin/index.html 200
+
+            # 其他路径回退到主应用
+            /* /index.html 200
+        </div>
+
+        <a href="#" class="btn">查看完整示例项目</a>
+    </div>
+
+    <div class="card">
+        <h2>常见问题与解决方案</h2>
+
+        <h3>1. 页面刷新后显示 404</h3>
+        <p><strong>问题：</strong>在 SPA 中直接访问路由或刷新页面时显示 404 错误。</p>
+        <p><strong>解决方案：</strong>添加通配符重定向规则，将所有路径指向 index.html。</p>
+
+        <h3>2. 下级目录无法正确加载资源</h3>
+        <p><strong>问题：</strong>下级目录中的页面无法加载 CSS、JS 或图片资源。</p>
+        <p><strong>解决方案：</strong>使用绝对路径或相对于根目录的路径引用资源。</p>
+
+        <h3>3. 需要为不同目录设置不同规则</h3>
+        <p><strong>问题：</strong>项目中有多个 SPA 或不同结构的目录。</p>
+        <p><strong>解决方案：</strong>为每个目录设置特定的重定向规则，确保规则顺序正确。</p>
+    </div>
+</div>
+
+<footer>
+    <div class="container">
+        <p>Netlify 下级目录配置演示 &copy; 2023</p>
+    </div>
+</footer>
+
+<script>
+    // 标签页切换功能
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabs = document.querySelectorAll('.nav-tab');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // 移除所有活动的标签和内容
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                // 激活当前标签和对应的内容
+                this.classList.add('active');
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+    });
+</script>
+</body>
+</html>

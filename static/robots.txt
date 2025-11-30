@@ -1,2 +1,7 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin/
+Disallow: /preview/
+
+Sitemap: https://www.rd-v6.com/sitemap-index.xml
+Sitemap: https://www.rd-v6.com/sitemap-0.xml

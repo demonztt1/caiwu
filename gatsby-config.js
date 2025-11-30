@@ -1,5 +1,6 @@
 // gatsby-config.js
 const { languageCodes } = require('./src/config/languages')
+const { getSitemapLanguages, defaultLanguage } = require('./src/config/languages')
 
 // 动态创建文件系统配置
 const fileSystemConfigs = [
@@ -58,7 +59,6 @@ module.exports = {
         FAST_DEV: false,
         DEV_SSR: false
     },
-    adapter: require('gatsby-adapter-netlify').default,
     siteMetadata: {
         title: "元都-逆熵",
         titleTemplate: "%s · 量化万物，共建生态",
@@ -116,7 +116,76 @@ module.exports = {
                 ],
             },
         },
-        `gatsby-plugin-sitemap`,
+        {
+            resolve: `gatsby-plugin-sitemap`,
+            options: {
+                output: "/",
+                query: `
+      {
+        site {
+          siteMetadata {
+            siteUrl
+          }
+        }
+        allSitePage {
+          nodes {
+            path
+          }
+        }
+      }
+    `,
+                resolvePages: ({ allSitePage: { nodes } }) => {
+                    return nodes
+                },
+                serialize: ({ path }) => {
+                    const sitemapLanguages = getSitemapLanguages()
+
+                    // 只为实际有内容的页面生成sitemap条目
+                    const entries = []
+
+                    sitemapLanguages.forEach(lang => {
+                        let urlPath = path
+
+                        // 处理语言前缀
+                        if (lang !== defaultLanguage) {
+                            // 如果路径已经是其他语言，需要替换
+                            const pathSegments = path.split('/').filter(segment => segment)
+                            const firstSegment = pathSegments[0]
+
+                            // 检查第一个路径段是否是语言代码
+                            const isLanguagePath = sitemapLanguages.includes(firstSegment)
+
+                            if (isLanguagePath) {
+                                // 替换语言代码
+                                pathSegments[0] = lang
+                                urlPath = '/' + pathSegments.join('/')
+                            } else {
+                                // 添加语言前缀
+                                urlPath = `/${lang}${path}`
+                            }
+                        }
+
+                        // 确保URL格式正确
+                        if (urlPath === `/${lang}`) {
+                            urlPath = `/${lang}/`
+                        }
+
+                        entries.push({
+                            url: urlPath,
+                            changefreq: getChangeFreq(path),
+                            priority: getPriority(path),
+                            links: sitemapLanguages.map(linkLang => ({
+                                lang: linkLang,
+                                url: getLocalizedPath(path, linkLang)
+                            }))
+                        })
+                    })
+
+                    return entries
+                }
+            }
+        }
+        ,
         {
             resolve: `gatsby-plugin-manifest`,
             options: {
@@ -149,4 +218,35 @@ module.exports = {
         },
         `gatsby-plugin-offline`,
     ],
+}
+// 辅助函数
+function getChangeFreq(path) {
+    if (path === '/') return 'daily'
+    if (path.includes('/blog/')) return 'weekly'
+    if (path.includes('/services/') || path.includes('/products/')) return 'monthly'
+    return 'weekly'
+}
+
+function getPriority(path) {
+    if (path === '/') return 1.0
+    if (path.includes('/services/') || path.includes('/products/')) return 0.8
+    if (path.includes('/blog/')) return 0.7
+    return 0.6
+}
+
+function getLocalizedPath(path, lang) {
+    if (lang === defaultLanguage) return path
+
+    const pathSegments = path.split('/').filter(segment => segment)
+    const sitemapLanguages = getSitemapLanguages()
+    const firstSegment = pathSegments[0]
+
+    // 如果第一个路径段是语言代码，替换它
+    if (sitemapLanguages.includes(firstSegment)) {
+        pathSegments[0] = lang
+        return '/' + pathSegments.join('/')
+    }
+
+    // 否则添加语言前缀
+    return `/${lang}${path}`
 }
